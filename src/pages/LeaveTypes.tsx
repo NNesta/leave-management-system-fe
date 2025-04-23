@@ -1,104 +1,102 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { LeaveType } from "@/components/leave-type/type";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
-import { LeaveTypeForm } from "@/components/leave-type/LeaveTypeForm";
-import { LeaveTypesTable } from "@/components/leave-type/LeaveTypesTable";
+  useAllLeaveTypes,
+  useCreateLeaveType,
+  useUpdateLeaveType,
+  useDeleteLeaveType,
+} from "@/hooks/useLeaveType";
+import LeaveTypeDialog from "@/components/leave-type/Dialog";
+import LeaveTypeTable from "@/components/leave-type/Table";
 
-export type LeaveType = {
-  id: string;
-  name: string;
-  defaultDays: number;
-  accrualRate: number;
-  maxCarryForward: number;
-};
-
-// Mock data for leave types
-const initialLeaveTypes: LeaveType[] = [
-  {
-    id: "1",
-    name: "Annual Leave",
-    defaultDays: 20,
-    accrualRate: 1.67,
-    maxCarryForward: 5,
-  },
-  {
-    id: "2",
-    name: "Sick Leave",
-    defaultDays: 10,
-    accrualRate: 0.83,
-    maxCarryForward: 0,
-  },
-];
-
-export default function LeaveTypes() {
-  const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>(initialLeaveTypes);
-  const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(
+const LeaveTypesPage = () => {
+  const { toast } = useToast();
+  const { data: leaveTypes } = useAllLeaveTypes();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentLeaveType, setCurrentLeaveType] = useState<LeaveType | null>(
     null
   );
+  const { mutate: createLeaveType } = useCreateLeaveType();
+  const { mutate: updateLeaveType } = useUpdateLeaveType();
+  const { mutate: deleteLeaveType } = useDeleteLeaveType();
 
-  const handleSave = (leaveType: Omit<LeaveType, "id">) => {
-    if (editingLeaveType) {
-      setLeaveTypes((types) =>
-        types.map((type) =>
-          type.id === editingLeaveType.id ? { ...leaveType, id: type.id } : type
-        )
-      );
-    } else {
-      setLeaveTypes((types) => [
-        ...types,
-        { ...leaveType, id: Math.random().toString() },
-      ]);
-    }
+  const handleUpdateLeaveType = (leaveType: LeaveType) => {
+    updateLeaveType({ ...leaveType, id: currentLeaveType?.id });
+    setIsDialogOpen(false);
+    setCurrentLeaveType(null);
+    toast({
+      title: "Success",
+      description: "Leave type updated successfully",
+    });
   };
 
-  const handleDelete = (id: string) => {
-    setLeaveTypes((types) => types.filter((type) => type.id !== id));
+  const handleAddLeaveType = (leaveType: LeaveType) => {
+    createLeaveType(leaveType);
+    setIsDialogOpen(false);
+    setCurrentLeaveType(null);
+    toast({
+      title: "Success",
+      description: "Leave type added successfully",
+    });
+  };
+  const handleDeleteLeaveType = (id: string) => {
+    deleteLeaveType(id);
+    toast({
+      title: "Success",
+      description: "Leave type deleted successfully",
+    });
+  };
+
+  const handleEditLeaveType = (leaveType: LeaveType) => {
+    setCurrentLeaveType(leaveType);
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenAddDialog = () => {
+    setCurrentLeaveType(null);
+    setIsDialogOpen(true);
   };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Leave Types</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Leave Type
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Leave Type</DialogTitle>
-            </DialogHeader>
-            <LeaveTypeForm onSave={handleSave} />
-          </DialogContent>
-        </Dialog>
+      <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Leave Type Management</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your organization's leave type records
+            </p>
+          </div>
+          <Button
+            onClick={handleOpenAddDialog}
+            className="flex items-center gap-2"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Add Leave Type
+          </Button>
+        </div>
       </div>
-      <LeaveTypesTable
-        leaveTypes={leaveTypes}
-        onEdit={setEditingLeaveType}
-        onDelete={handleDelete}
+
+      <LeaveTypeTable
+        leaveTypes={leaveTypes || []}
+        onEdit={handleEditLeaveType}
+        onDelete={handleDeleteLeaveType}
       />
-      {editingLeaveType && (
-        <Dialog
-          open={!!editingLeaveType}
-          onOpenChange={() => setEditingLeaveType(null)}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Leave Type</DialogTitle>
-            </DialogHeader>
-            <LeaveTypeForm leaveType={editingLeaveType} onSave={handleSave} />
-          </DialogContent>
-        </Dialog>
-      )}
+
+      <LeaveTypeDialog
+        isOpen={isDialogOpen}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setCurrentLeaveType(null);
+        }}
+        onSubmit={currentLeaveType ? handleUpdateLeaveType : handleAddLeaveType}
+        leaveType={currentLeaveType}
+      />
     </div>
   );
-}
+};
+
+export default LeaveTypesPage;

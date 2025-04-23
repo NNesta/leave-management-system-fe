@@ -10,12 +10,13 @@ const fetchAllUsers = async () => {
   return data;
 };
 
-const fetchUser = async (id: string) => {
-  const { data } = await axios.get(`${VITE_API_URL}/employees/${id}`);
+const fetchUser = async (email: string) => {
+  const { data } = await axios.get(`${VITE_API_URL}/employees/email`, {
+    params: { email },
+  });
   return data;
 };
 
-// Create, Update and delete the user using react query
 const createUser = async (user: Omit<User, "id">) => {
   const { data } = await axios.post(`${VITE_API_URL}/employees`, user);
   return data;
@@ -56,6 +57,13 @@ export const useCreateUser = () => {
       });
       console.error(error);
     },
+  });
+};
+
+export const useUserByEmail = (email: string) => {
+  return useQuery({
+    queryKey: ["users", email],
+    queryFn: () => fetchUser(email),
   });
 };
 

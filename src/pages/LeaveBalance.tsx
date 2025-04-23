@@ -1,98 +1,77 @@
 import { useState } from "react";
-import { LeaveBalanceTable } from "@/components/leave-balance/LeaveBalanceTable";
-import { LeaveBalanceForm } from "@/components/leave-balance/LeaveBalanceForm";
 import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { LeaveBalance } from "@/components/leave-balance/type";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  useUpdateLeaveBalance,
+  useDeleteLeaveBalance,
+  useLeaveBalances,
+} from "@/hooks/useLeaveBalance";
+import LeaveBalanceDialog from "@/components/leave-balance/Dialog";
+import LeaveBalanceTable from "@/components/leave-balance/Table";
 
-export interface LeaveBalance {
-  id: string;
-  employeeEmail: string;
-  takenDays: number;
-  totalDays: number;
-  leaveTypes: string[];
-}
+const LeaveBalancePage = () => {
+  const { toast } = useToast();
+  const { data: leaveBalances, isLoading } = useLeaveBalances();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentLeaveBalance, setCurrentLeaveBalance] =
+    useState<LeaveBalance | null>(null);
+  const { mutate: updateLeaveBalance } = useUpdateLeaveBalance();
+  const { mutate: deleteLeaveBalance } = useDeleteLeaveBalance();
 
-// Mock data for initial development
-const initialLeaveBalances: LeaveBalance[] = [
-  {
-    id: "1",
-    employeeEmail: "john.doe@example.com",
-    takenDays: 5,
-    totalDays: 20,
-    leaveTypes: ["Annual Leave", "Sick Leave"],
-  },
-  {
-    id: "2",
-    employeeEmail: "jane.smith@example.com",
-    takenDays: 3,
-    totalDays: 15,
-    leaveTypes: ["Annual Leave"],
-  },
-];
-
-export default function LeaveBalance() {
-  const [leaveBalances, setLeaveBalances] =
-    useState<LeaveBalance[]>(initialLeaveBalances);
-  const [editingBalance, setEditingBalance] = useState<LeaveBalance | null>(
-    null
-  );
-
-  const handleSubmit = (data: Omit<LeaveBalance, "id">) => {
-    if (editingBalance) {
-      setLeaveBalances((balances) =>
-        balances.map((balance) =>
-          balance.id === editingBalance.id
-            ? { ...data, id: balance.id }
-            : balance
-        )
-      );
-      setEditingBalance(null);
-    } else {
-      setLeaveBalances((balances) => [
-        ...balances,
-        { ...data, id: crypto.randomUUID() },
-      ]);
-    }
+  const handleUpdateLeaveBalance = (leaveBalance: LeaveBalance) => {
+    updateLeaveBalance({ ...leaveBalance, id: currentLeaveBalance?.id });
+    setIsDialogOpen(false);
+    setCurrentLeaveBalance(null);
+    toast({
+      title: "Success",
+      description: "Leave balance updated successfully",
+    });
+  };
+  const handleDeleteLeaveBalance = (id: string) => {
+    deleteLeaveBalance(id);
+    toast({
+      title: "Success",
+      description: "Leave balance deleted successfully",
+    });
   };
 
-  const handleDelete = (id: string) => {
-    setLeaveBalances((balances) =>
-      balances.filter((balance) => balance.id !== id)
-    );
+  const handleEditLeaveBalance = (leaveBalance: LeaveBalance) => {
+    setCurrentLeaveBalance(leaveBalance);
+    setIsDialogOpen(true);
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Leave Balances</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Add Leave Balance</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingBalance ? "Edit Leave Balance" : "Add Leave Balance"}
-              </DialogTitle>
-            </DialogHeader>
-            <LeaveBalanceForm
-              defaultValues={editingBalance ?? undefined}
-              onSubmit={handleSubmit}
-            />
-          </DialogContent>
-        </Dialog>
+    <div className="container mx-auto py-8 px-4">
+      <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">Leave Balance Management</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your organization's leave balance records
+            </p>
+          </div>
+        </div>
       </div>
+
       <LeaveBalanceTable
-        leaveBalances={leaveBalances}
-        onEdit={setEditingBalance}
-        onDelete={handleDelete}
+        leaveBalances={leaveBalances || []}
+        onEdit={handleEditLeaveBalance}
+        onDelete={handleDeleteLeaveBalance}
+      />
+
+      <LeaveBalanceDialog
+        isOpen={isDialogOpen}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setCurrentLeaveBalance(null);
+        }}
+        onSubmit={handleUpdateLeaveBalance}
+        leaveBalance={currentLeaveBalance}
       />
     </div>
   );
-}
+};
+
+export default LeaveBalancePage;
