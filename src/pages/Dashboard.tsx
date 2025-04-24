@@ -13,12 +13,14 @@ import { LeaveBalanceChart } from "@/components/dashboard/LeaveBalanceChart";
 import { LeaveRequestsTable } from "@/components/dashboard/LeaveRequestsTable";
 import { TeamCalendar } from "@/components/dashboard/TeamCalendar";
 import { useMsal } from "@azure/msal-react";
-import { useLeaveBalances } from "@/hooks/useLeaveBalance";
+import { useLeaveBalanceByEmail } from "@/hooks/useLeaveBalance";
 
 const Dashboard = () => {
   const { accounts } = useMsal();
   // fetch leave balance using the react query and use the accounts email as parama
-  const { data: leaveBalances } = useLeaveBalances();
+  const { data: userLeaveBalances } = useLeaveBalanceByEmail(
+    accounts[0].username
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -39,7 +41,7 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {leaveBalances?.map((leave) => (
+          {userLeaveBalances?.map((leave) => (
             <Card key={leave.leaveType.name}>
               <CardHeader className="pb-2">
                 <CardDescription>{leave.leaveType.name}</CardDescription>

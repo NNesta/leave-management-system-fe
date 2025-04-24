@@ -26,8 +26,8 @@ import { Button } from "@/components/ui/button";
 import { FloatingSidebarTrigger } from "./floating-sidebar-trigger";
 import UserAvatar from "./UserAvatar";
 import { useMsal } from "@azure/msal-react";
-import { useMemo } from "react";
-import { useUserByEmail } from "@/hooks/useEmployee";
+import { useMemo, useState } from "react";
+import { FaBalanceScale } from "react-icons/fa";
 
 function SidebarAvatarProfile() {
   const { state } = useSidebar();
@@ -83,6 +83,7 @@ export function AppSidebar() {
   const { accounts } = useMsal();
   // const { data: user } = useUserByEmail(accounts[0]?.username || "");
   const userRoles = accounts[0]?.idTokenClaims.roles || ["Staff"];
+  const [forceRecalc, setForceRecalc] = useState(false);
 
   const menuItems = useMemo(() => {
     const common = [
@@ -91,9 +92,8 @@ export function AppSidebar() {
     ];
     const manager = [
       { label: "Manager View", path: "/manager", icon: Briefcase },
-      { label: "Leave Details", path: "/leave/:id", icon: ClipboardList },
       { label: "Leave Types", path: "/leave-types", icon: ClipboardList },
-      { label: "Leave Balance", path: "/leave-balance", icon: ClipboardList },
+      { label: "Leave Balance", path: "/leave-balance", icon: FaBalanceScale },
     ];
     const admin = [
       { label: "Team Calendar", path: "/team-calendar", icon: CalendarDays },
@@ -103,7 +103,7 @@ export function AppSidebar() {
     if (userRoles.includes("Admin")) return [...common, ...manager, ...admin];
     if (userRoles.includes("Manager")) return [...common, ...manager];
     return common;
-  }, [userRoles]);
+  }, [userRoles, forceRecalc]);
   return (
     <Sidebar
       style={
