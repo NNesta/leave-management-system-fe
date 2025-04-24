@@ -99,8 +99,8 @@ export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const { accounts } = useMsal();
-  const { data: user } = useUserByEmail(accounts[0]?.username || "");
-  const userRole = user?.role || "Staff";
+  // const { data: user } = useUserByEmail(accounts[0]?.username || "");
+  const userRole = accounts[0]?.idTokenClaims.role || "Staff";
 
   const menuItems = useMemo(() => {
     const common = [
