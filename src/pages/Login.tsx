@@ -10,6 +10,7 @@ import {
 import { CalendarCheck } from "lucide-react";
 import { useMsal } from "@azure/msal-react";
 import { useEffect } from "react";
+import { TfiMicrosoftAlt } from "react-icons/tfi";
 
 const Login = () => {
   const { instance, accounts } = useMsal();
@@ -58,22 +59,7 @@ const Login = () => {
           </CardHeader>
           <CardContent>
             <Button onClick={handleLogin} className="w-full" variant="outline">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 48 48"
-                className="mr-2"
-              >
-                <path
-                  fill="#f8312f"
-                  d="M44,24c0,11.044-8.956,20-20,20S4,35.044,4,24S12.956,4,24,4S44,12.956,44,24z"
-                />
-                <path
-                  fill="#fff"
-                  d="M21,22.019h5v5h-5V22.019z M15.001,27.019L15,22l5,0.019v5H15.001z M16,16h9v-5h-9V16z M27.001,33H18v-4.981h9.001V33z"
-                />
-              </svg>
+              <TfiMicrosoftAlt className="h-4 w-4 mr-2" />
               Sign in with Microsoft
             </Button>
           </CardContent>

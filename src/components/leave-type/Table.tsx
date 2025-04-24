@@ -1,4 +1,3 @@
-import { User } from "@/components/user/types";
 import {
   Table,
   TableBody,
@@ -8,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { PenIcon, Trash2Icon } from "lucide-react";
+import { FileSpreadsheetIcon, PenIcon, Trash2Icon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,8 +32,45 @@ const LeaveTypeTable = ({
   onEdit,
   onDelete,
 }: LeaveTypeTableProps) => {
+  const exportToCSV = () => {
+    const headers = [
+      "Name",
+      "Default Days",
+      "Default Accrual Rate",
+      "Max Carry Forward",
+    ];
+    const csvData = leaveTypes.map((emp) =>
+      [
+        emp.name,
+        emp.defaultDays,
+        emp.defaultAccrualRate,
+        emp.maxCarryForward,
+      ].join(",")
+    );
+
+    const csvContent = [headers.join(","), ...csvData].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", "leave-types.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     <div className="bg-white border rounded-lg shadow-sm">
+      <div className="p-4 flex justify-end">
+        <Button
+          variant="outline"
+          onClick={exportToCSV}
+          className="flex items-center gap-2"
+        >
+          <FileSpreadsheetIcon className="h-4 w-4" />
+          Export to CSV
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -53,7 +89,7 @@ const LeaveTypeTable = ({
                 colSpan={6}
                 className="text-center h-24 text-muted-foreground"
               >
-                No users found. Add one to get started.
+                No leave types found. Add one to get started.
               </TableCell>
             </TableRow>
           ) : (

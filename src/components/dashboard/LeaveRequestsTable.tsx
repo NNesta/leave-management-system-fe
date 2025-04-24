@@ -76,7 +76,7 @@ export const LeaveRequestsTable = () => {
             </TableCell>
             <TableCell className="text-right">
               <Button variant="outline" size="sm">
-                <Link to={`/leave/${request.id}`}>
+                <Link className="flex items-center" to={`/leave/${request.id}`}>
                   <FileText className="h-4 w-4 mr-1" /> Details
                 </Link>
               </Button>

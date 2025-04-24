@@ -2,44 +2,24 @@ import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText } from "lucide-react";
-
-// Mock data for a single leave request
-const leaveRequest = {
-  id: "1",
-  type: "Annual Leave",
-  startDate: "2025-08-15",
-  endDate: "2025-08-20",
-  days: 6,
-  status: "Pending",
-  reason: "Family vacation planned with parents visiting from overseas",
-  supportingDocs: [
-    {
-      name: "Flight_Tickets.pdf",
-      size: "2.4 MB",
-      type: "application/pdf",
-    },
-    {
-      name: "Hotel_Booking.pdf",
-      size: "1.8 MB",
-      type: "application/pdf",
-    },
-  ],
-  employee: {
-    name: "John Doe",
-    avatar: "https://i.pravatar.cc/150?u=johndoe",
-    position: "Software Engineer",
-    department: "Engineering",
-  },
-};
+import { ArrowLeft, FileText } from "lucide-react";
+import { useLeaveRequestById } from "@/hooks/useLeaveRequests";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const LeaveDetails = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
+  const { data: leaveRequest, isLoading, error } = useLeaveRequestById(id!);
 
-  // Function to format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+  // Function to format date array to Date object
+  const formatDateArray = (dateArray: number[] | null) => {
+    if (!dateArray) return "Not specified";
+    return new Date(
+      dateArray[0],
+      dateArray[1] - 1,
+      dateArray[2]
+    ).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -60,9 +40,30 @@ const LeaveDetails = () => {
     }
   };
 
+  if (isLoading) {
+    return <div className="container mx-auto py-8 px-4">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        Error loading leave request details
+      </div>
+    );
+  }
+
+  if (!leaveRequest) {
+    return (
+      <div className="container mx-auto py-8 px-4">Leave request not found</div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             Leave Request Details
@@ -76,25 +77,26 @@ const LeaveDetails = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={leaveRequest.employee.avatar} />
+                    <AvatarImage
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        leaveRequest.employee.fullName
+                      )}`}
+                    />
                     <AvatarFallback>
-                      {leaveRequest.employee.name.charAt(0)}
+                      {leaveRequest.employee.fullName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className="text-xl">
-                      {leaveRequest.employee.name}
+                      {leaveRequest.employee.fullName}
                     </CardTitle>
                     <p className="text-sm text-gray-500">
-                      {leaveRequest.employee.position} •{" "}
+                      {leaveRequest.employee.role} •{" "}
                       {leaveRequest.employee.department}
                     </p>
                   </div>
                 </div>
-                <Badge
-                  className={getStatusColor(leaveRequest.status)}
-                  variant="outline"
-                >
+                <Badge className={getStatusColor(leaveRequest.status)}>
                   {leaveRequest.status}
                 </Badge>
               </div>
@@ -103,22 +105,24 @@ const LeaveDetails = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Leave Type</p>
-                  <p className="font-medium">{leaveRequest.type}</p>
+                  <p className="font-medium">{leaveRequest.leaveType.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Duration</p>
-                  <p className="font-medium">{leaveRequest.days} days</p>
+                  <p className="font-medium">
+                    {leaveRequest.daysNumber || "Not specified"} days
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Start Date</p>
                   <p className="font-medium">
-                    {formatDate(leaveRequest.startDate)}
+                    {formatDateArray(leaveRequest.startDate)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">End Date</p>
                   <p className="font-medium">
-                    {formatDate(leaveRequest.endDate)}
+                    {formatDateArray(leaveRequest.endDate)}
                   </p>
                 </div>
               </div>
@@ -126,28 +130,48 @@ const LeaveDetails = () => {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Reason</p>
                 <p className="p-3 bg-gray-50 rounded-md">
-                  {leaveRequest.reason}
+                  {leaveRequest.leaveReason}
                 </p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 mb-3">
-                  Supporting Documents
-                </p>
                 <div className="space-y-2">
-                  {leaveRequest.supportingDocs.map((doc) => (
-                    <div
-                      key={doc.name}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 mr-3 text-gray-500" />
-                        <span>{doc.name}</span>
+                  {leaveRequest.supportingDocuments.length > 0 && (
+                    <div>
+                      <p className="text-sm text-gray-500 mb-3">
+                        Supporting Documents
+                      </p>
+                      <div className="space-y-2">
+                        {leaveRequest.supportingDocuments.map((doc) => (
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            key={doc.id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex items-center">
+                              <FileText className="h-5 w-5 mr-3 text-gray-500" />
+                              <span>{doc.fileName}</span>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              {doc.fileType}
+                            </span>
+                          </a>
+                        ))}
                       </div>
-                      <span className="text-sm text-gray-500">{doc.size}</span>
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {leaveRequest.comment && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Comments</p>
+                    <p className="p-3 bg-gray-50 rounded-md">
+                      {leaveRequest.comment}
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

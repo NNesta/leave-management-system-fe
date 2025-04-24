@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { PenIcon, Trash2Icon } from "lucide-react";
+import { FileSpreadsheetIcon, PenIcon, Trash2Icon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,8 +28,35 @@ interface UserTableProps {
 }
 
 const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
+  const exportToCSV = () => {
+    const headers = ["Name", "Email", "Role", "Department"];
+    const csvData = users.map((emp) =>
+      [emp.fullName, emp.email, emp.role, emp.department].join(",")
+    );
+
+    const csvContent = [headers.join(","), ...csvData].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", "users.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   return (
     <div className="bg-white border rounded-lg shadow-sm">
+      <div className="p-4 flex justify-end">
+        <Button
+          variant="outline"
+          onClick={exportToCSV}
+          className="flex items-center gap-2"
+        >
+          <FileSpreadsheetIcon className="h-4 w-4" />
+          Export to CSV
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>

@@ -82,22 +82,28 @@ const NewLeaveRequest = () => {
   });
 
   const onSubmit = (data) => {
-    console.log({ data });
     const formData = new FormData();
     formData.append(
       "leaveRequest",
-      JSON.stringify({
-        employeeEmail: accounts[0].username,
-        leaveTypeId: data.leaveType,
-        leaveReason: data.leaveReason,
-        // startDate: format(new Date(data.startDate), "yyyy-MM-dd"),
-        // endDate: format(new Date(dat
-      })
+      new Blob(
+        [
+          JSON.stringify({
+            employeeEmail: accounts[0].username,
+            leaveTypeId: data.leaveTypeId,
+            leaveReason: data.leaveReason,
+            halfDay: data.isHalfDay,
+            startDate: format(data.startDate, "yyyy-MM-dd").toString(),
+            endDate: data.endDate
+              ? format(data.endDate, "yyyy-MM-dd").toString()
+              : null,
+          }),
+        ],
+        { type: "application/json" }
+      )
     );
     data.supportingDocuments.forEach((file: File) => {
       formData.append("files", file);
     });
-    console.log(formData, "+++++++++++++++++++++");
 
     mutation.mutate(formData, {
       onSuccess: () => {
@@ -137,14 +143,16 @@ const NewLeaveRequest = () => {
                 <div className="space-y-2">
                   <Label htmlFor="leave-type">Leave Type</Label>
                   <Controller
-                    name="leaveType"
+                    name="leaveTypeId"
                     control={control}
+                    rules={{ required: "Please select a leave type" }}
+                    defaultValue=""
                     render={({ field }) => (
                       <Select
-                        onValueChange={field.onChange}
                         value={field.value}
+                        onValueChange={field.onChange}
                       >
-                        <SelectTrigger id="leave-type">
+                        <SelectTrigger id="leaveTypeId">
                           <SelectValue placeholder="Select leave type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -153,7 +161,7 @@ const NewLeaveRequest = () => {
                               <SelectItem
                                 textValue={type.name}
                                 key={type.id}
-                                value={type.id}
+                                value={type.id.toString()}
                               >
                                 {type.name}
                               </SelectItem>

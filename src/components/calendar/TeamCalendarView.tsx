@@ -21,12 +21,49 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CalendarEvent, CalendarViewMode, CalendarDay } from "./types";
 import { CalendarHeader } from "./CalendarHeader";
 import { CalendarMonthView } from "./CalendarMonthView";
-import { LEAVE_EVENTS, PUBLIC_HOLIDAYS } from "./mock-data";
+import { PUBLIC_HOLIDAYS } from "./mock-data";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import { LeaveRequest } from "../manager/types";
+import { useLeaveRequestsByStatus } from "@/hooks/useLeaveRequests";
+import { CalendarDay, CalendarEvent, CalendarViewMode } from "./types";
+import { Link } from "react-router-dom";
+
+const arrayToDate = (dateArray: number[] | null): Date | null => {
+  if (!dateArray) return null;
+  return new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
+};
+
+// Helper function to convert API leave requests to calendar events
+const convertToCalendarEvents = (
+  leaveRequests: LeaveRequest[]
+): CalendarEvent[] => {
+  return leaveRequests
+    .filter((request) => request.startDate && request.endDate) // Filter out requests with null dates
+    .map((request) => ({
+      id: request.id.toString(),
+      title: request.leaveType.name,
+      startDate: subDays(new Date(request.startDate), 1),
+      endDate: addDays(new Date(request.endDate), 3),
+      type: request.leaveType.name,
+      isHalfDay: request.isHalfDay,
+      department: request.employee.department,
+      employee: {
+        name: request.employee.fullName,
+        email: request.employee.email,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          request.employee.fullName
+        )}`,
+      },
+      status: request.status.toLowerCase() as
+        | "pending"
+        | "approved"
+        | "rejected",
+      color: "#3b82f6", // You can map colors based on leave type if needed
+    }));
+};
 
 export const TeamCalendarView = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -35,29 +72,27 @@ export const TeamCalendarView = () => {
   );
   const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
   const [days, setDays] = useState<CalendarDay[]>([]);
-  const [filteredEvents, setFilteredEvents] =
-    useState<CalendarEvent[]>(LEAVE_EVENTS);
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [selectedLeaveType, setSelectedLeaveType] = useState("all");
 
-  // Apply filters to events
-  useEffect(() => {
-    let events = [...LEAVE_EVENTS];
+  // Fetch leave requests using React Query
+  const {
+    data: leaveRequests,
+    isLoading,
+    error,
+  } = useLeaveRequestsByStatus("Approved");
 
-    // Filter by department
-    if (selectedDepartment !== "all") {
-      events = events.filter(
-        (event) => event.department === selectedDepartment
-      );
-    }
-
-    // Filter by leave type
-    if (selectedLeaveType !== "all") {
-      events = events.filter((event) => event.type === selectedLeaveType);
-    }
-
-    setFilteredEvents(events);
-  }, [selectedDepartment, selectedLeaveType]);
+  // Convert API data to calendar events
+  const filteredEvents = leaveRequests
+    ? convertToCalendarEvents(leaveRequests).filter((event) => {
+        const departmentMatch =
+          selectedDepartment === "all" ||
+          event.department === selectedDepartment;
+        const typeMatch =
+          selectedLeaveType === "all" || event.type === selectedLeaveType;
+        return departmentMatch && typeMatch;
+      })
+    : [];
 
   // Generate calendar days
   useEffect(() => {
@@ -167,6 +202,22 @@ export const TeamCalendarView = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        Loading calendar...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64 text-red-500">
+        Error loading calendar data. Please try again.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -182,11 +233,10 @@ export const TeamCalendarView = () => {
           selectedLeaveType={selectedLeaveType}
           onLeaveTypeChange={setSelectedLeaveType}
         />
-        <Button
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={handleAddEvent}
-        >
-          Add Leave
+        <Button className="bg-blue-600 hover:bg-blue-700" asChild>
+          <Link to="https://outlook.office365.com/calendar/view/workweek">
+            View in Outlook Calendar
+          </Link>
         </Button>
       </div>
 

@@ -1,6 +1,7 @@
 import { useMsal } from "@azure/msal-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { toast } from "@/hooks/use-toast";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 const fetchLeaveRequests = async (email: string) => {
@@ -10,6 +11,7 @@ const fetchLeaveRequests = async (email: string) => {
   });
   return data || [];
 };
+
 const fetchLeaveRequestsByStatus = async (
   status: "Pending" | "Approved" | "Rejected"
 ) => {
@@ -40,17 +42,53 @@ const rejectLeaveRequest = async (requestId: string, comment: string) => {
   return data;
 };
 
+// get leave request by id
+const fetchLeaveRequest = async (requestId: string) => {
+  const { data } = await axios.get(`${VITE_API_URL}/leaves/${requestId}`);
+  return data;
+};
+
 // mutation hook for approove request
 export const useApproveLeaveRequest = (comment: string) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (requestId: string) => approveLeaveRequest(requestId, comment),
+    onSuccess: () => {
+      toast({
+        title: "Leave request approved",
+        description: "The leave request has been approved.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["leaveRequests", "LeaveRequest"],
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to approve leave request",
+        variant: "destructive",
+      });
+      console.error(error);
+    },
   });
 };
 
 // mutation hook for reject request
 export const useRejectLeaveRequest = (comment: string) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (requestId: string) => rejectLeaveRequest(requestId, comment),
+    onSuccess: () => {
+      toast({
+        title: "Leave request rejected",
+        description: "The leave request has been rejected.",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["leaveRequests", "LeaveRequest"],
+      });
+    },
   });
 };
 
@@ -62,11 +100,19 @@ export const useLeaveRequests = () => {
   });
 };
 
+// get leave request by id
+export const useLeaveRequestById = (requestId: string) => {
+  return useQuery({
+    queryKey: ["leaveRequest", requestId],
+    queryFn: () => fetchLeaveRequest(requestId),
+  });
+};
+
 export const useLeaveRequestsByStatus = (
   status: "Pending" | "Approved" | "Rejected"
 ) => {
   return useQuery({
-    queryKey: ["leaveRequestsByStatus", status],
+    queryKey: ["leaveRequests", status],
     queryFn: () => fetchLeaveRequestsByStatus(status),
   });
 };

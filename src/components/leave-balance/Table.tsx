@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { PenIcon, Trash2Icon } from "lucide-react";
+import { FileSpreadsheetIcon, PenIcon, Trash2Icon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,8 +33,52 @@ const LeaveBalanceTable = ({
   onEdit,
   onDelete,
 }: LeaveBalanceTableProps) => {
+  const exportToCSV = () => {
+    const headers = [
+      "Name",
+      "Email",
+      "Role",
+      "Department",
+      "Leave Type",
+      "Total Days",
+      "Taken Days",
+    ];
+    const csvData = leaveBalances.map((emp) =>
+      [
+        emp.employee.fullName,
+        emp.employee.email,
+        emp.employee.role,
+        emp.employee.department,
+        emp.leaveType.name,
+        emp.totalDays,
+        emp.takenDays,
+      ].join(",")
+    );
+
+    const csvContent = [headers.join(","), ...csvData].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", "leave-balance.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="bg-white border rounded-lg shadow-sm">
+      <div className="p-4 flex justify-end">
+        <Button
+          variant="outline"
+          onClick={exportToCSV}
+          className="flex items-center gap-2"
+        >
+          <FileSpreadsheetIcon className="h-4 w-4" />
+          Export to CSV
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -54,7 +98,7 @@ const LeaveBalanceTable = ({
                 colSpan={5}
                 className="text-center h-24 text-muted-foreground"
               >
-                No users found. Add one to get started.
+                No leave balances found. Add one to get started.
               </TableCell>
             </TableRow>
           ) : (

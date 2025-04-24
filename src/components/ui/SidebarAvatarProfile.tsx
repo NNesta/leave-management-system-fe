@@ -29,12 +29,10 @@ import { useMsal } from "@azure/msal-react";
 import { useMemo } from "react";
 import { useUserByEmail } from "@/hooks/useEmployee";
 
-// Fake user for this sidebar mockup
-
 function SidebarAvatarProfile() {
   const { state } = useSidebar();
   const { accounts } = useMsal();
-
+  console.log({ accounts });
   return (
     <div className="flex w-full items-center justify-between p-4 pb-2">
       <div
@@ -52,22 +50,6 @@ function SidebarAvatarProfile() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function SidebarNotification() {
-  const { state } = useSidebar();
-  return (
-    <div
-      className={cn(
-        "relative  mt-1 w-fit",
-        state === "collapsed" ? "self-center" : "self-end"
-      )}
-    >
-      <Bell className="text-white/90" size={22} />
-      {/* Notification badge */}
-      <span className="absolute -top-1 -right-0 flex size-3 rounded-full bg-red-500 border-2 border-black" />
     </div>
   );
 }
@@ -100,7 +82,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const { accounts } = useMsal();
   // const { data: user } = useUserByEmail(accounts[0]?.username || "");
-  const userRole = accounts[0]?.idTokenClaims.role || "Staff";
+  const userRoles = accounts[0]?.idTokenClaims.roles || ["Staff"];
 
   const menuItems = useMemo(() => {
     const common = [
@@ -118,10 +100,10 @@ export function AppSidebar() {
       { label: "Users", path: "/users", icon: Users },
     ];
 
-    if (userRole === "Manager") return [...common, ...manager];
-    if (userRole === "Admin") return [...common, ...manager, ...admin];
+    if (userRoles.includes("Admin")) return [...common, ...manager, ...admin];
+    if (userRoles.includes("Manager")) return [...common, ...manager];
     return common;
-  }, [userRole]);
+  }, [userRoles]);
   return (
     <Sidebar
       style={
@@ -148,7 +130,7 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu
                   className={cn(
-                    "w-full flex-col flex",
+                    "w-full flex-col flex gap-4 my-16",
                     state === "collapsed" ? "items-center" : "items-start"
                   )}
                 >
@@ -162,7 +144,7 @@ export function AppSidebar() {
                             "font-medium rounded-lg text-base transition-all",
                             location.pathname === item.path
                               ? "bg-white/10 text-white font-bold"
-                              : "text-white/80 hover:bg-white/5"
+                              : "hover:text-gray-400 hover:bg-white/5"
                           )}
                         >
                           <a

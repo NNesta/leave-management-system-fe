@@ -1,7 +1,12 @@
 import axios from "axios";
 import { loginRequest } from "@/authConfig";
+import { LeaveRequest } from "@/components/manager/types";
 
-export async function createCalendarEvent(instance, account, leaveDetails) {
+export async function createCalendarEvent(
+  instance,
+  account,
+  leaveDetails: LeaveRequest
+) {
   const response = await instance.acquireTokenSilent({
     scopes: loginRequest.scopes,
     account: account,
@@ -12,23 +17,21 @@ export async function createCalendarEvent(instance, account, leaveDetails) {
   console.log({ response, accessToken, leaveDetails });
 
   const event = {
-    subject: "Leave Approved: " + leaveDetails.employeeName,
+    subject: `${leaveDetails.employee.fullName} going in ${leaveDetails.leaveType.name}`,
     body: {
       contentType: "HTML",
-      content: `Leave from ${leaveDetails.startDate} to ${leaveDetails.endDate}<br/>Reason: ${leaveDetails.reason}`,
+      content: `Leave from ${
+        leaveDetails.startDate || new Date().toLocaleDateString()
+      } to ${
+        leaveDetails.endDate || new Date().toLocaleDateString()
+      }<br/>Reason: ${leaveDetails.leaveReason}`,
     },
     start: {
-      dateTime: leaveDetails.startDate + "T09:00:00",
-      timeZone: "Africa/Kigali",
+      dateTime: leaveDetails.startDate,
     },
     end: {
-      dateTime: leaveDetails.endDate + "T17:00:00",
-      timeZone: "Africa/Kigali",
+      dateTime: leaveDetails.endDate,
     },
-    location: {
-      displayName: "N/A",
-    },
-    attendees: [], // optionally add HR or manager emails
   };
 
   await axios.post("https://graph.microsoft.com/v1.0/me/events", event, {
