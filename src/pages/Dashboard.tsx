@@ -8,7 +8,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { CalendarCheck, Clock, FileText } from "lucide-react";
+import { CalendarCheck, Clock } from "lucide-react";
 import { LeaveBalanceChart } from "@/components/dashboard/LeaveBalanceChart";
 import { LeaveRequestsTable } from "@/components/dashboard/LeaveRequestsTable";
 import { TeamCalendar } from "@/components/dashboard/TeamCalendar";
@@ -17,6 +17,8 @@ import { useLeaveBalanceByEmail } from "@/hooks/useLeaveBalance";
 import { LeaveRequest } from "@/types/leaves";
 import { isAfter } from "date-fns";
 import { useMemo } from "react";
+import NotificationBell from "@/components/NotificationBell";
+import { useUserByEmail } from "@/hooks/useEmployee";
 
 const Dashboard = () => {
   const { accounts } = useMsal();
@@ -24,6 +26,7 @@ const Dashboard = () => {
   const { data: userLeaveBalances } = useLeaveBalanceByEmail(
     accounts[0].username
   );
+  const { data: user } = useUserByEmail(accounts[0].username);
   const pendingRequests = useMemo(() => {
     return userLeaveBalances?.filter(
       (leave: LeaveRequest) =>
@@ -34,7 +37,6 @@ const Dashboard = () => {
         )
     );
   }, [userLeaveBalances]);
-  console.log({ userLeaveBalances });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,12 +48,15 @@ const Dashboard = () => {
             </h1>
             <p className="text-gray-600">Welcome back, {accounts[0].name}</p>
           </div>
-          <Button
-            className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700"
-            asChild
-          >
-            <Link to="/new-request">New Leave Request</Link>
-          </Button>
+          <div className="flex mt-4 md:mt-0">
+            <NotificationBell userId={user?.id} />
+            <Button
+              className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700"
+              asChild
+            >
+              <Link to="/new-request">New Leave Request</Link>
+            </Button>
+          </div>
         </div>
 
         {userLeaveBalances?.length !== 0 ? (

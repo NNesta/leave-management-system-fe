@@ -20,6 +20,7 @@ import UsersPage from "./pages/Users";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import DepartmentsPage from "./pages/Departments";
+import { toast } from "./hooks/use-toast";
 
 const App = () => {
   const { instance } = useMsal();
@@ -27,6 +28,26 @@ const App = () => {
   const location = useLocation();
   const shouldShowSidebar = !hideSidebarOn.includes(location.pathname);
   const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    const eventSource = new EventSource(
+      "http://localhost:8080/notifications/subscribe"
+    );
+
+    eventSource.addEventListener("notification", (event) => {
+      toast({
+        title: "Notification",
+        description: event.data,
+        variant: "default",
+      });
+    });
+
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
+
+    return () => eventSource.close();
+  }, []);
 
   useEffect(() => {
     instance.initialize().then(() => {

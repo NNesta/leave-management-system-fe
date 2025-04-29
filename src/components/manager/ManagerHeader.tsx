@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import NotificationBell from "../NotificationBell";
+import { useMsal } from "@azure/msal-react";
+import { useUserByEmail } from "@/hooks/useEmployee";
 
 export const ManagerHeader = () => {
+  const { accounts } = useMsal();
+  const { data: user } = useUserByEmail(accounts[0]?.username);
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
       <div>
@@ -11,12 +15,7 @@ export const ManagerHeader = () => {
       </div>
 
       <div className="flex mt-4 md:mt-0">
-        <Button variant="outline" className="mr-2 relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-            2
-          </span>
-        </Button>
+        <NotificationBell userId={user?.id} />
         <Button className="bg-blue-600 hover:bg-blue-700" asChild>
           <Link to="/team-calendar">Team Calendar</Link>
         </Button>
