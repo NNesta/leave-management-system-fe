@@ -8,6 +8,7 @@ import { RequestDetails } from "@/components/manager/RequestDetails";
 import { RecentApprovals } from "@/components/manager/RecentApprovals";
 import { CalendarCheck } from "lucide-react";
 import { useLeaveRequestsByStatus } from "@/hooks/useLeaveRequests";
+import TeamCalendar from "./TeamCalendar";
 
 const Manager = () => {
   const { data: pendingRequests } = useLeaveRequestsByStatus("PENDING");
@@ -40,22 +41,9 @@ const Manager = () => {
           <Tabs defaultValue="recent">
             <TabsList>
               <TabsTrigger value="recent">Recent Approvals</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming Leaves</TabsTrigger>
             </TabsList>
             <TabsContent value="recent">
               <RecentApprovals approvals={recentApprovals} />
-            </TabsContent>
-            <TabsContent value="upcoming">
-              <Card>
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-center">
-                    <CalendarCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">
-                      {"Team calendar will be shown here"}
-                    </p>
-                  </div>
-                </div>
-              </Card>
             </TabsContent>
           </Tabs>
         </div>
