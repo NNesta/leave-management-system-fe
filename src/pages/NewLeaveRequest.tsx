@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,24 +8,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { CalendarCheck, ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useMsal } from "@azure/msal-react";
 import { DocumentUpload } from "@/components/leave-request/DocumentUpload";
 import { format } from "date-fns";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LeaveTypeField } from "@/components/leave-request/LeaveTypeField";
+import { HalfDaySwitch } from "@/components/leave-request/HalfDaySwitch";
+import { toast } from "sonner";
+import { leaveFormSchema, LeaveFormValues } from "@/schemas/leaveRequestschema";
+import { DateRangeFields } from "@/components/leave-request/DateRangeField";
+import { LeaveReasonField } from "@/components/leave-request/LeaveReason";
+import { Form } from "@/components/ui/form";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
@@ -38,7 +34,6 @@ const fetchLeaveTypes = async () => {
 };
 
 const submitLeaveRequest = async (formData: FormData) => {
-  console.log({ formData });
   const { data } = await axios.post(
     `${VITE_API_URL}/leaves/apply-leave`,
     formData,
@@ -53,16 +48,27 @@ const submitLeaveRequest = async (formData: FormData) => {
 
 const NewLeaveRequest = () => {
   const navigate = useNavigate();
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { isSubmitting },
-  } = useForm();
   const queryClient = useQueryClient();
+  const { accounts } = useMsal();
 
+  const form = useForm<LeaveFormValues>({
+    resolver: zodResolver(leaveFormSchema),
+    defaultValues: {
+      leaveTypeId: undefined,
+      isHalfDay: false,
+      startDate: undefined,
+      endDate: undefined,
+      leaveReason: undefined,
+      supportingDocuments: [],
+    },
+    mode: "onBlur",
+  });
+
+  const { watch, handleSubmit, formState, getValues } = form;
+  const { isSubmitting, errors } = formState;
+  const isHalfDay = watch("isHalfDay");
+  const values = getValues();
+  console.log({ errors, values });
   const {
     data: leaveTypes,
     isLoading,
@@ -71,28 +77,35 @@ const NewLeaveRequest = () => {
     queryKey: ["leaveTypes"],
     queryFn: fetchLeaveTypes,
   });
-  const { accounts } = useMsal();
 
   const mutation = useMutation({
     mutationFn: submitLeaveRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leaveRequests"] });
-      reset();
+      form.reset();
+      toast.success("Leave request submitted successfully!");
+    },
+    onError: (error) => {
+      console.error("Error submitting leave request:", error);
+      toast.error("Failed to submit leave request. Please try again.");
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: LeaveFormValues) => {
+    console.log({ data });
     const formData = new FormData();
     formData.append(
       "leaveRequest",
       new Blob(
         [
           JSON.stringify({
-            employeeEmail: accounts[0].username,
+            userEmail: accounts[0].username,
             leaveTypeId: data.leaveTypeId,
-            leaveReason: data.leaveReason,
-            halfDay: data.isHalfDay,
-            startDate: format(data.startDate, "yyyy-MM-dd").toString(),
+            reason: data.leaveReason,
+            isHalfDay: data.isHalfDay,
+            startDate: data.startDate
+              ? format(data.startDate, "yyyy-MM-dd").toString()
+              : null,
             endDate: data.endDate
               ? format(data.endDate, "yyyy-MM-dd").toString()
               : null,
@@ -101,28 +114,23 @@ const NewLeaveRequest = () => {
         { type: "application/json" }
       )
     );
-    data.supportingDocuments.forEach((file: File) => {
-      formData.append("files", file);
-    });
 
-    mutation.mutate(formData, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["leaveRequests"] });
-        reset();
-      },
-    });
+    if (data.supportingDocuments && data.supportingDocuments.length > 0) {
+      data.supportingDocuments.forEach((file: File) => {
+        formData.append("files", file);
+      });
+    }
+
+    mutation.mutate(formData);
   };
 
-  if (isLoading) return <p>Loading leave types...</p>;
-  if (error) return <p>Failed to load leave types</p>;
+  if (isLoading) return <p className="p-8">Loading leave types...</p>;
+  if (error)
+    return <p className="p-8 text-destructive">Failed to load leave types</p>;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto py-8 px-4">
-        <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
-
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="flex items-center mb-6">
           <CalendarCheck className="h-8 w-8 text-blue-600 mr-3" />
           <h1 className="text-3xl font-bold text-gray-900">
@@ -130,147 +138,39 @@ const NewLeaveRequest = () => {
           </h1>
         </div>
 
-        <Card className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <CardHeader>
-              <CardTitle>Leave Request Form</CardTitle>
-              <CardDescription>
-                Submit a new leave request for approval
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="leave-type">Leave Type</Label>
-                  <Controller
-                    name="leaveTypeId"
-                    control={control}
-                    rules={{ required: "Please select a leave type" }}
-                    defaultValue=""
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger id="leaveTypeId">
-                          <SelectValue placeholder="Select leave type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {leaveTypes?.map((type) => (
-                              <SelectItem
-                                textValue={type.name}
-                                key={type.id}
-                                value={type.id.toString()}
-                              >
-                                {type.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
+        <Card className="">
+          <Form {...form}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <CardHeader>
+                <CardTitle>Leave Request Form</CardTitle>
+                <CardDescription>
+                  Submit a new leave request for approval
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <LeaveTypeField form={form} leaveTypes={leaveTypes} />
+                  <HalfDaySwitch form={form} />
                 </div>
 
-                <Controller
-                  name="isHalfDay"
-                  control={control}
-                  defaultValue={false}
-                  render={({ field }) => (
-                    <div className="flex items-center space-x-2 pt-6">
-                      <Switch
-                        id="isHalfDay"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                      <Label htmlFor="isHalfDay">Half Day Request</Label>
-                    </div>
-                  )}
-                />
-              </div>
+                <DateRangeFields form={form} isHalfDay={isHalfDay} />
+                <LeaveReasonField form={form} />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Controller
-                  name="startDate"
-                  control={control}
-                  defaultValue={new Date()}
-                  render={({ field }) => (
-                    <div className="space-y-2">
-                      <Label>Start Date</Label>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        className="rounded-md border"
-                      />
-                      {field.value && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {format(field.value, "PPP")}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
+                <DocumentUpload form={form} maxFiles={5} />
+              </CardContent>
 
-                {!watch("isHalfDay") && (
-                  <Controller
-                    name="endDate"
-                    control={control}
-                    defaultValue={null}
-                    render={({ field }) => (
-                      <div className="space-y-2">
-                        <Label>End Date</Label>
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          className="rounded-md border"
-                        />
-                        {field.value && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {format(field.value, "PPP")}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  />
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reason">Reason for Leave</Label>
-                <Textarea
-                  id="reason"
-                  {...register("leaveReason")}
-                  placeholder="Please provide a reason for your leave request"
-                  rows={4}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="supporting-documents">
-                  Supporting Documents (optional)
-                </Label>
-                <Controller
-                  name="supportingDocuments"
-                  control={control}
-                  defaultValue={[]}
-                  render={({ field: { onChange } }) => (
-                    <DocumentUpload onFilesChange={onChange} maxFiles={5} />
-                  )}
-                />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Submit Leave Request"}
-              </Button>
-            </CardFooter>
-          </form>
+              <CardFooter>
+                <Button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Leave Request"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
         </Card>
       </div>
     </div>

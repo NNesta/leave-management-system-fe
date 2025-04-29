@@ -14,6 +14,9 @@ import { LeaveRequestsTable } from "@/components/dashboard/LeaveRequestsTable";
 import { TeamCalendar } from "@/components/dashboard/TeamCalendar";
 import { useMsal } from "@azure/msal-react";
 import { useLeaveBalanceByEmail } from "@/hooks/useLeaveBalance";
+import { LeaveRequest } from "@/types/leaves";
+import { isAfter } from "date-fns";
+import { useMemo } from "react";
 
 const Dashboard = () => {
   const { accounts } = useMsal();
@@ -21,6 +24,16 @@ const Dashboard = () => {
   const { data: userLeaveBalances } = useLeaveBalanceByEmail(
     accounts[0].username
   );
+  const pendingRequests = useMemo(() => {
+    return userLeaveBalances?.filter(
+      (leave: LeaveRequest) =>
+        leave.status === "PENDING" &&
+        isAfter(
+          new Date(leave.endDate[0], leave.endDate[1] - 1, leave.endDate[2]),
+          new Date()
+        )
+    );
+  }, [userLeaveBalances]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -75,39 +88,33 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Clock className="mr-2 h-5 w-5" /> Upcoming Leaves
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
-                    <CalendarCheck className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Annual Leave</p>
-                    <p className="text-sm text-gray-500">
-                      Aug 15 - Aug 20, 2025
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">Approved</p>
-                  </div>
+          {pendingRequests && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="mr-2 h-5 w-5" /> Upcoming Leaves
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {pendingRequests.map((leave) => (
+                    <div className="flex items-start">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                        <CalendarCheck className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{leave.leaveType.name}</p>
+                        <p className="text-sm text-gray-500">
+                          Aug 15 - Aug 20, 2025
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">Approved</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-start">
-                  <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center mr-3 flex-shrink-0">
-                    <FileText className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Personal Leave</p>
-                    <p className="text-sm text-gray-500">Sep 5, 2025</p>
-                    <p className="text-xs text-gray-400 mt-1">Pending</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <Tabs defaultValue="requests" className="w-full">

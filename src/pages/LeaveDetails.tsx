@@ -79,20 +79,19 @@ const LeaveDetails = () => {
                   <Avatar className="h-12 w-12">
                     <AvatarImage
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        leaveRequest.employee.fullName
+                        leaveRequest.user.fullName
                       )}`}
                     />
                     <AvatarFallback>
-                      {leaveRequest.employee.fullName.charAt(0)}
+                      {leaveRequest.user.fullName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <CardTitle className="text-xl">
-                      {leaveRequest.employee.fullName}
+                      {leaveRequest.user.fullName}
                     </CardTitle>
                     <p className="text-sm text-gray-500">
-                      {leaveRequest.employee.role} •{" "}
-                      {leaveRequest.employee.department}
+                      {leaveRequest.user.role} • {leaveRequest.user.department}
                     </p>
                   </div>
                 </div>
@@ -109,9 +108,7 @@ const LeaveDetails = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Duration</p>
-                  <p className="font-medium">
-                    {leaveRequest.daysNumber || "Not specified"} days
-                  </p>
+                  <p className="font-medium">{leaveRequest?.daysNumber} days</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Start Date</p>
@@ -130,7 +127,7 @@ const LeaveDetails = () => {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Reason</p>
                 <p className="p-3 bg-gray-50 rounded-md">
-                  {leaveRequest.leaveReason}
+                  {leaveRequest.reason}
                 </p>
               </div>
 

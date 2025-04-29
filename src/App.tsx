@@ -19,6 +19,7 @@ import TeamCalendar from "./pages/TeamCalendar";
 import UsersPage from "./pages/Users";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import DepartmentsPage from "./pages/Departments";
 
 const App = () => {
   const { instance } = useMsal();
@@ -117,6 +118,14 @@ const App = () => {
                   element={
                     <PrivateRoute>
                       <UsersPage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/departments"
+                  element={
+                    <PrivateRoute>
+                      <DepartmentsPage />
                     </PrivateRoute>
                   }
                 />

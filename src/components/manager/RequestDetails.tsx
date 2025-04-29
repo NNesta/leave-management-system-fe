@@ -9,7 +9,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LeaveRequest } from "@/components/manager/types";
-import { countWorkingDays } from "@/lib/countWorkingDays";
 import { SupportingDocument } from "./SupportingDocument";
 import {
   useApproveLeaveRequest,
@@ -62,18 +61,16 @@ export const RequestDetails = ({ request }: RequestDetailsProps) => {
           <div className="flex items-center mb-6">
             <Avatar className="h-12 w-12 mr-4">
               <AvatarImage
-                src={request?.employee.avatar}
-                alt={request?.employee.fullName}
+                src={request?.user.avatar.url}
+                alt={request?.user.fullName}
               />
               <AvatarFallback>
-                {request?.employee.fullName.charAt(0)}
+                {request?.user.fullName.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="text-xl font-medium">
-                {request?.employee.fullName}
-              </h3>
-              <p className="text-gray-500">{request?.employee.position}</p>
+              <h3 className="text-xl font-medium">{request?.user.fullName}</h3>
+              <p className="text-gray-500">{request?.user.role}</p>
             </div>
           </div>
 
@@ -84,23 +81,25 @@ export const RequestDetails = ({ request }: RequestDetailsProps) => {
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">Duration</p>
-              <p className="font-medium">
-                {countWorkingDays(request?.startDate, request?.endDate)} days
-              </p>
+              <p className="font-medium">{request?.daysNumber} days</p>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">From</p>
-              <p className="font-medium">{formatDate(request?.startDate)}</p>
+              <p className="font-medium">
+                {formatDate(request?.startDate.toString())}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1">To</p>
-              <p className="font-medium">{formatDate(request?.endDate)}</p>
+              <p className="font-medium">
+                {formatDate(request?.endDate.toString())}
+              </p>
             </div>
           </div>
 
           <div className="mb-6">
             <p className="text-sm text-gray-500 mb-1">Reason</p>
-            <p className="p-3 bg-gray-50 rounded-md">{request?.leaveReason}</p>
+            <p className="p-3 bg-gray-50 rounded-md">{request?.reason}</p>
           </div>
 
           <div className="mb-6">

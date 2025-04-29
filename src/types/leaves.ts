@@ -25,9 +25,9 @@ export interface SupportingDocument {
 
 export interface LeaveRequest {
   id: number;
-  employee: Employee;
+  user: Employee;
   leaveType: LeaveType;
-  leaveReason: string;
+  reason: string;
   status: string;
   comment: string | null;
   dateCreated: number[] | null;
@@ -35,5 +35,5 @@ export interface LeaveRequest {
   endDate: number[] | null;
   daysNumber: number | null;
   supportingDocuments: SupportingDocument[];
-  halfDay: boolean;
+  isHalfDay: boolean;
 }

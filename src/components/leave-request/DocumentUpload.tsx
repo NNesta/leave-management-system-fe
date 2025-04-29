@@ -1,86 +1,170 @@
 import { useState } from "react";
-import { Upload, FileText, FileImage, X } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { UseFormReturn } from "react-hook-form";
 
-interface DocumentUploadProps {
-  onFilesChange: (files: File[]) => void;
-  maxFiles?: number;
-}
+type DocumentUploadProps = {
+  form: UseFormReturn<
+    {
+      leaveTypeId?: string;
+      isHalfDay?: boolean;
+      startDate?: Date;
+      endDate?: Date;
+      leaveReason?: string;
+      supportingDocuments?: File[];
+    },
+    unknown,
+    undefined
+  >;
+  maxFiles: number;
+};
 
-export const DocumentUpload = ({
-  onFilesChange,
-  maxFiles = 5,
-}: DocumentUploadProps) => {
-  const [files, setFiles] = useState<File[]>([]);
+export const DocumentUpload = ({ form, maxFiles }: DocumentUploadProps) => {
+  const [dragActive, setDragActive] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newFiles = Array.from(event.target.files || []);
-    const updatedFiles = [...files, ...newFiles].slice(0, maxFiles);
-    setFiles(updatedFiles);
-    onFilesChange(updatedFiles);
-  };
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const removeFile = (index: number) => {
-    const updatedFiles = files.filter((_, i) => i !== index);
-    setFiles(updatedFiles);
-    onFilesChange(updatedFiles);
-  };
-
-  const getFileIcon = (type: string) => {
-    if (type.startsWith("image/")) {
-      return <FileImage className="h-5 w-5 text-blue-500" />;
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
-    return <FileText className="h-5 w-5 text-gray-500" />;
+  };
+
+  const handleDrop = (
+    e: React.DragEvent,
+    onChange: (files: File[]) => void
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const currentFiles = form.getValues("supportingDocuments") || [];
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const newFiles = Array.from(e.dataTransfer.files);
+
+      if (currentFiles.length + newFiles.length > maxFiles) {
+        toast.error(`You can only upload up to ${maxFiles} files.`);
+        return;
+      }
+
+      onChange([...currentFiles, ...newFiles]);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (files: File[]) => void
+  ) => {
+    e.preventDefault();
+
+    const currentFiles = form.getValues("supportingDocuments") || [];
+
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+
+      if (currentFiles.length + newFiles.length > maxFiles) {
+        toast.error(`You can only upload up to ${maxFiles} files.`);
+        return;
+      }
+
+      onChange([...currentFiles, ...newFiles]);
+    }
+  };
+
+  const removeFile = (index: number, onChange: (files: File[]) => void) => {
+    const files = form.getValues("supportingDocuments") || [];
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    onChange(newFiles);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center">
-        <input
-          type="file"
-          id="documents"
-          className="hidden"
-          multiple
-          onChange={handleFileChange}
-          accept="image/*,application/pdf,.doc,.docx"
-        />
-        <Label
-          htmlFor="documents"
-          className="cursor-pointer flex items-center justify-center border border-dashed rounded-md p-4 w-full hover:bg-gray-50"
-        >
-          <Upload className="h-5 w-5 mr-2 text-gray-500" />
-          <span className="text-gray-600">
-            Upload documents (max {maxFiles} files)
-          </span>
-        </Label>
-      </div>
-
-      {files.length > 0 && (
-        <div className="space-y-2">
-          {files.map((file, index) => (
+    <FormField
+      control={form.control}
+      name="supportingDocuments"
+      render={({ field: { onChange, value, ...rest } }) => (
+        <FormItem>
+          <FormLabel>Supporting Documents (optional)</FormLabel>
+          <FormControl>
             <div
-              key={index}
-              className="flex items-center justify-between bg-gray-50 p-2 rounded-md"
+              className={cn(
+                "border-2 border-dashed rounded-md p-6 transition-colors",
+                dragActive ? "border-primary bg-primary/5" : "border-input"
+              )}
+              onDragEnter={(e) => handleDrag(e)}
+              onDragOver={(e) => handleDrag(e)}
+              onDragLeave={(e) => handleDrag(e)}
+              onDrop={(e) => handleDrop(e, onChange)}
             >
-              <div className="flex items-center space-x-2">
-                {getFileIcon(file.type)}
-                <span className="text-sm truncate max-w-[200px]">
-                  {file.name}
-                </span>
+              <div className="flex flex-col items-center justify-center text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Drag and drop files here, or click to select files
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  (Maximum {maxFiles} files)
+                </p>
+                <input
+                  id="fileInput"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => handleChange(e, onChange)}
+                  {...rest}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => document.getElementById("fileInput")?.click()}
+                >
+                  Select Files
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-red-500 hover:text-red-700"
-                onClick={() => removeFile(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
-          ))}
-        </div>
+          </FormControl>
+
+          {value && value.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-medium">Uploaded Files:</p>
+              <ul className="space-y-2">
+                {value.map((file: File, index: number) => (
+                  <li
+                    key={`${file.name}-${index}`}
+                    className="flex items-center justify-between p-2 bg-muted rounded-md text-sm"
+                  >
+                    <span className="truncate max-w-[80%]">{file.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => removeFile(index, onChange)}
+                    >
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Remove file</span>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <FormMessage />
+        </FormItem>
       )}
-    </div>
+    />
   );
 };

@@ -1,4 +1,4 @@
-import { User } from "@/components/user/types";
+import { Department } from "@/components/department/types";
 import {
   Table,
   TableBody,
@@ -20,39 +20,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { LeaveBalance } from "./type";
 
-interface LeaveBalanceTableProps {
-  leaveBalances: LeaveBalance[];
-  onEdit: (leaveBalance: LeaveBalance) => void;
+interface DepartmentTableProps {
+  departments: Department[];
+  onEdit: (department: Department) => void;
   onDelete: (id: string) => void;
 }
 
-const LeaveBalanceTable = ({
-  leaveBalances,
+const DepartmentsTable = ({
+  departments,
   onEdit,
   onDelete,
-}: LeaveBalanceTableProps) => {
+}: DepartmentTableProps) => {
   const exportToCSV = () => {
-    const headers = [
-      "Name",
-      "Email",
-      "Role",
-      "Department",
-      "Leave Type",
-      "Total Days",
-      "Taken Days",
-    ];
-    const csvData = leaveBalances.map((emp) =>
-      [
-        emp.user.fullName,
-        emp.user.email,
-        emp.user.role,
-        emp.user.department,
-        emp.leaveType.name,
-        emp.totalDays,
-        emp.takenDays,
-      ].join(",")
+    const headers = ["Name", "Manager", "Description"];
+    const csvData = departments.map((emp) =>
+      [emp.name, emp.manager.fullName, emp.description].join(",")
     );
 
     const csvContent = [headers.join(","), ...csvData].join("\n");
@@ -61,12 +44,11 @@ const LeaveBalanceTable = ({
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", "leave-balance.csv");
+    link.setAttribute("download", "departments.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
-
   return (
     <div className="bg-white border rounded-lg shadow-sm">
       <div className="p-4 flex justify-end">
@@ -83,42 +65,36 @@ const LeaveBalanceTable = ({
         <TableHeader>
           <TableRow>
             <TableHead>No.</TableHead>
-            <TableHead>Full Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Leave Type</TableHead>
-            <TableHead>Total Days</TableHead>
-            <TableHead>Taken Days</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Manager</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {leaveBalances.length === 0 ? (
+          {departments.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={5}
                 className="text-center h-24 text-muted-foreground"
               >
-                No leave balances found. Add one to get started.
+                No departments found. Add one to get started.
               </TableCell>
             </TableRow>
           ) : (
-            leaveBalances.map((leaveBalance, index) => (
-              <TableRow key={leaveBalance.id}>
+            departments.map((department, index) => (
+              <TableRow key={department.id}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
-                <TableCell className="font-medium">
-                  {leaveBalance.user.fullName}
-                </TableCell>
-                <TableCell>{leaveBalance.user.email}</TableCell>
-                <TableCell>{leaveBalance.leaveType.name}</TableCell>
-                <TableCell>{leaveBalance.totalDays}</TableCell>
-                <TableCell>{leaveBalance.takenDays}</TableCell>
+                <TableCell className="font-medium">{department.name}</TableCell>
+                <TableCell>{department.manager.fullName}</TableCell>
+                <TableCell>{department.description}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => onEdit(leaveBalance)}
-                      aria-label={`Edit ${leaveBalance.user.fullName}`}
+                      onClick={() => onEdit(department)}
+                      aria-label={`Edit ${department.name}`}
                     >
                       <PenIcon className="h-4 w-4" />
                     </Button>
@@ -128,7 +104,7 @@ const LeaveBalanceTable = ({
                           variant="outline"
                           size="icon"
                           className="text-destructive hover:bg-destructive/10"
-                          aria-label={`Delete ${leaveBalance.user.fullName}`}
+                          aria-label={`Delete ${department.name}`}
                         >
                           <Trash2Icon className="h-4 w-4" />
                         </Button>
@@ -137,15 +113,14 @@ const LeaveBalanceTable = ({
                         <AlertDialogHeader>
                           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will permanently delete{" "}
-                            {leaveBalance.user.fullName}'s record. This action
-                            cannot be undone.
+                            This will permanently delete {department.name}'s
+                            record. This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => onDelete(leaveBalance.id)}
+                            onClick={() => onDelete(department.id)}
                             className="bg-destructive hover:bg-destructive/90"
                           >
                             Delete
@@ -164,4 +139,4 @@ const LeaveBalanceTable = ({
   );
 };
 
-export default LeaveBalanceTable;
+export default DepartmentsTable;

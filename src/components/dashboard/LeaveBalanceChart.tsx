@@ -9,23 +9,20 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { LeaveBalance } from "../leave-balance/type";
+import { useLeaveBalancesByEmail } from "@/hooks/useLeaveBalance";
+import { useMsal } from "@azure/msal-react";
 
-const processLeaveData = (leaveRequests: LeaveRequest[]) => {
+const processLeaveData = (leaveBalances: LeaveBalance[]) => {
   // Create a map to store leave counts by type
-  const leaveCountsByType = leaveRequests.reduce((acc, request) => {
-    const leaveType = request.leaveType.name;
+  const leaveCountsByType = leaveBalances.reduce((acc, balance) => {
+    const leaveType = balance.leaveType.name;
     if (!acc[leaveType]) {
       acc[leaveType] = {
-        total: request.leaveType.defaultDays || 0,
-        used: 0,
-        remaining: request.leaveType.defaultDays || 0,
+        total: balance.totalDays || 0,
+        used: balance.takenDays || 0,
+        remaining: balance.totalDays - balance.takenDays || 0,
       };
-    }
-
-    // Only count approved leaves
-    if (request.status.toUpperCase() === "APPROVED") {
-      acc[leaveType].used += request.daysNumber || 0;
-      acc[leaveType].remaining = acc[leaveType].total - acc[leaveType].used;
     }
 
     return acc;
@@ -41,11 +38,13 @@ const processLeaveData = (leaveRequests: LeaveRequest[]) => {
 };
 
 export const LeaveBalanceChart = () => {
+  const { accounts } = useMsal();
+  const email = accounts[0].username;
   const {
-    data: leaveRequests,
+    data: leaveBalances,
     isLoading,
     error,
-  } = useLeaveRequestsByStatus("Approved");
+  } = useLeaveBalancesByEmail(email);
 
   if (isLoading) {
     return (
@@ -63,7 +62,7 @@ export const LeaveBalanceChart = () => {
     );
   }
 
-  const chartData = processLeaveData(leaveRequests || []);
+  const chartData = processLeaveData(leaveBalances || []);
   return (
     <div className="w-full h-72">
       <ResponsiveContainer width="100%" height="100%">
@@ -82,7 +81,7 @@ export const LeaveBalanceChart = () => {
           <Legend />
           <Bar dataKey="total" name="Total Leave" fill="#3b82f6" />
           <Bar dataKey="used" name="Used Leave" fill="#10b981" />
-          <Bar dataKey="personal" name="Personal Leave" fill="#f59e0b" />
+          <Bar dataKey="remaining" name="Remaining Leave" fill="#f59e0b" />
         </BarChart>
       </ResponsiveContainer>
     </div>

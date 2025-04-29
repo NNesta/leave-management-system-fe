@@ -106,6 +106,6 @@ _(Include images or diagrams relevant to the setup or tasks here)_
 ## Additional Notes
 
 - Ensure that ports 8080 and 3000 are not in use by other applications on your machine.
-- If you encounter any issues, check the Docker logs for more information using `docker logs <CONTAINER_ID>`.
+- If you encount er any issues, check the Docker logs for more information using `docker logs <CONTAINER_ID>`.
 
 Following these steps will set up and run the Leave Management System on your local machine. If you need further assistance, please refer to the project's documentation or reach out to the support team.

@@ -6,19 +6,27 @@ import { useToast } from "@/components/ui/use-toast";
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 const fetchAllUsers = async () => {
-  const { data } = await axios.get(`${VITE_API_URL}/employees`);
+  const { data } = await axios.get(`${VITE_API_URL}/users`);
   return data;
 };
 
 const fetchUser = async (email: string) => {
-  const { data } = await axios.get(`${VITE_API_URL}/employees/email`, {
+  const { data } = await axios.get(`${VITE_API_URL}/users/email`, {
     params: { email },
   });
   return data;
 };
 
 const createUser = async (user: Omit<User, "id">) => {
-  const { data } = await axios.post(`${VITE_API_URL}/employees`, user);
+  const { data } = await axios.post(`${VITE_API_URL}/users`, user);
+  return data;
+};
+
+//get user by their role
+const fetchUsersByRole = async (role: string) => {
+  const { data } = await axios.get(`${VITE_API_URL}/users/role`, {
+    params: { role },
+  });
   return data;
 };
 
@@ -35,6 +43,13 @@ const updateUser = async (user: User) => {
 const deleteUser = async (id: string) => {
   const { data } = await axios.delete(`${VITE_API_URL}/employees/${id}`);
   return data;
+};
+
+export const useUsersByRole = (role: string) => {
+  return useQuery({
+    queryKey: ["users", role],
+    queryFn: () => fetchUsersByRole(role),
+  });
 };
 
 export const useCreateUser = () => {
@@ -62,7 +77,7 @@ export const useCreateUser = () => {
 
 export const useUserByEmail = (email: string) => {
   return useQuery({
-    queryKey: ["users", email],
+    queryKey: ["user", email],
     queryFn: () => fetchUser(email),
   });
 };

@@ -44,7 +44,7 @@ export const CalendarMonthView = ({
           }}
         >
           <span className="font-medium">{event.title} (Half Day)</span>
-          <span className="ml-1 text-gray-600">{event.employee.name}</span>
+          <span className="ml-1 text-gray-600">{event.user.name}</span>
         </div>
       );
     }
@@ -57,7 +57,7 @@ export const CalendarMonthView = ({
           style={{ backgroundColor: event.color, color: "white" }}
         >
           <span className="font-medium">{event.title}</span>
-          <span className="ml-1">{event.employee.name}</span>
+          <span className="ml-1">{event.user.name}</span>
         </div>
       );
     }
@@ -98,7 +98,7 @@ export const CalendarMonthView = ({
         style={{ backgroundColor: event.color, color: "white" }}
       >
         <span className="font-medium">{event.title}</span>
-        <span className="ml-1">{event.employee.name}</span>
+        <span className="ml-1">{event.user.name}</span>
       </div>
     );
   };

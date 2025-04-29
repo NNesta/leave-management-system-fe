@@ -22,6 +22,7 @@ export const PendingRequests = ({
   activeRequest,
   onRequestSelect,
 }: PendingRequestsProps) => {
+  console.log({ requests });
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -57,18 +58,16 @@ export const PendingRequests = ({
                 <div className="flex items-center mb-2">
                   <Avatar className="h-10 w-10 mr-3">
                     <AvatarImage
-                      src={request.employee.avatar}
-                      alt={request.employee.fullName}
+                      src={request.user.avatar.url}
+                      alt={request.user.fullName}
                     />
                     <AvatarFallback>
-                      {request.employee.fullName.charAt(0)}
+                      {request.user.fullName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{request.employee.fullName}</p>
-                    {/* <p className="text-sm text-gray-500">
-                    {request.employee.position}
-                  </p> */}
+                    <p className="font-medium">{request.user.fullName}</p>
+                    <p className="text-sm text-gray-500">{request.user.role}</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-3">
@@ -79,13 +78,13 @@ export const PendingRequests = ({
                     {request.leaveType.name}
                   </Badge>
                   <span className="text-sm text-gray-500">
-                    {countWorkingDays(request.startDate, request.endDate)} days
+                    {request?.daysNumber} days
                   </span>
                 </div>
                 <p className="text-sm mt-2">
-                  {formatDate(request.startDate)}
+                  {formatDate(request.startDate.toString())}
                   {request.startDate !== request.endDate &&
-                    ` - ${formatDate(request.endDate)}`}
+                    ` - ${formatDate(request.endDate.toString())}`}
                 </p>
               </div>
             ))}

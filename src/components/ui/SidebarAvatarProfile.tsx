@@ -13,7 +13,6 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import {
   Users,
-  Bell,
   LogOut,
   Briefcase,
   FilePlus,
@@ -26,13 +25,14 @@ import { Button } from "@/components/ui/button";
 import { FloatingSidebarTrigger } from "./floating-sidebar-trigger";
 import UserAvatar from "./UserAvatar";
 import { useMsal } from "@azure/msal-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { FaBalanceScale } from "react-icons/fa";
+import { FcManager } from "react-icons/fc";
+import { useUserByEmail } from "@/hooks/useEmployee";
+import { User } from "../user/types";
 
-function SidebarAvatarProfile() {
+function SidebarAvatarProfile({ currentUser }: { currentUser: User }) {
   const { state } = useSidebar();
-  const { accounts } = useMsal();
-  console.log({ accounts });
   return (
     <div className="flex w-full items-center justify-between p-4 pb-2">
       <div
@@ -41,11 +41,14 @@ function SidebarAvatarProfile() {
           state === "collapsed" && "justify-center p-0"
         )}
       >
-        <UserAvatar />
+        <UserAvatar
+          avatarUrl={currentUser?.avatar?.url}
+          name={currentUser?.fullName}
+        />
         {state === "expanded" && (
           <div>
             <div className="font-semibold leading-tight text-white text-base">
-              {accounts[0]?.name}
+              {currentUser?.fullName}
             </div>
           </div>
         )}
@@ -81,9 +84,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const { accounts } = useMsal();
-  // const { data: user } = useUserByEmail(accounts[0]?.username || "");
-  const userRoles = accounts[0]?.idTokenClaims.roles || ["Staff"];
-  const [forceRecalc, setForceRecalc] = useState(false);
+  const { data: currentUser } = useUserByEmail(accounts[0]?.username);
 
   const menuItems = useMemo(() => {
     const common = [
@@ -91,19 +92,20 @@ export function AppSidebar() {
       { label: "New Leave Request", path: "/new-request", icon: FilePlus },
     ];
     const manager = [
-      { label: "Manager View", path: "/manager", icon: Briefcase },
+      { label: "Manager View", path: "/manager", icon: FcManager },
       { label: "Leave Types", path: "/leave-types", icon: ClipboardList },
       { label: "Leave Balance", path: "/leave-balance", icon: FaBalanceScale },
     ];
     const admin = [
       { label: "Team Calendar", path: "/team-calendar", icon: CalendarDays },
       { label: "Users", path: "/users", icon: Users },
+      { label: "Departments", path: "/departments", icon: Briefcase },
     ];
 
-    if (userRoles.includes("Admin")) return [...common, ...manager, ...admin];
-    if (userRoles.includes("Manager")) return [...common, ...manager];
+    if (currentUser?.role === "ADMIN") return [...common, ...manager, ...admin];
+    if (currentUser?.role === "MANAGER") return [...common, ...manager];
     return common;
-  }, [userRoles, forceRecalc]);
+  }, [currentUser]);
   return (
     <Sidebar
       style={
@@ -122,7 +124,7 @@ export function AppSidebar() {
     >
       <div className="flex flex-col h-full bg-[#1A1F2C]">
         <SidebarHeader>
-          <SidebarAvatarProfile />
+          <SidebarAvatarProfile currentUser={currentUser} />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>

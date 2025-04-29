@@ -2,10 +2,11 @@ import { useMsal } from "@azure/msal-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
+import { ErrorType } from "@/types/error";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 const fetchLeaveRequests = async (email: string) => {
-  const { data } = await axios.get(`${VITE_API_URL}/leaves/employee`, {
+  const { data } = await axios.get(`${VITE_API_URL}/leaves/user`, {
     params: { email },
     withCredentials: true,
   });
@@ -13,7 +14,7 @@ const fetchLeaveRequests = async (email: string) => {
 };
 
 const fetchLeaveRequestsByStatus = async (
-  status: "Pending" | "Approved" | "Rejected"
+  status: "PENDING" | "APPROVED" | "REJECTED"
 ) => {
   const { data } = await axios.get(`${VITE_API_URL}/leaves/status/${status}`);
   return data || [];
@@ -24,7 +25,7 @@ const approveLeaveRequest = async (requestId: string, comment: string) => {
   const { data } = await axios.put(
     `${VITE_API_URL}/leaves/${requestId}/status`,
     {
-      status: "Approved",
+      status: "APPROVED",
       comment,
     }
   );
@@ -35,7 +36,7 @@ const rejectLeaveRequest = async (requestId: string, comment: string) => {
   const { data } = await axios.put(
     `${VITE_API_URL}/leaves/${requestId}/status`,
     {
-      status: "Rejected",
+      status: "REJECTED",
       comment,
     }
   );
@@ -63,10 +64,12 @@ export const useApproveLeaveRequest = (comment: string) => {
         queryKey: ["leaveRequests", "LeaveRequest"],
       });
     },
-    onError: (error) => {
+    onError: (error: ErrorType) => {
+      console.log({ error }, "______++++");
+      const data = error.response?.data;
       toast({
-        title: "Error",
-        description: "Failed to approve leave request",
+        title: data?.title || "Error",
+        description: data?.message || "Failed to approve leave request",
         variant: "destructive",
       });
       console.error(error);
@@ -83,7 +86,7 @@ export const useRejectLeaveRequest = (comment: string) => {
       toast({
         title: "Leave request rejected",
         description: "The leave request has been rejected.",
-        variant: "destructive",
+        variant: "default",
       });
       queryClient.invalidateQueries({
         queryKey: ["leaveRequests", "LeaveRequest"],
@@ -109,7 +112,7 @@ export const useLeaveRequestById = (requestId: string) => {
 };
 
 export const useLeaveRequestsByStatus = (
-  status: "Pending" | "Approved" | "Rejected"
+  status: "PENDING" | "APPROVED" | "REJECTED"
 ) => {
   return useQuery({
     queryKey: ["leaveRequests", status],

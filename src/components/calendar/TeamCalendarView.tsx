@@ -45,16 +45,30 @@ const convertToCalendarEvents = (
     .map((request) => ({
       id: request.id.toString(),
       title: request.leaveType.name,
-      startDate: subDays(new Date(request.startDate), 1),
-      endDate: addDays(new Date(request.endDate), 3),
+      startDate: subDays(
+        new Date(
+          request.startDate[0],
+          request.startDate[1] - 1,
+          request.startDate[2]
+        ),
+        1
+      ),
+      endDate: addDays(
+        new Date(
+          request.endDate[0],
+          request.endDate[1] - 1,
+          request.endDate[2]
+        ),
+        3
+      ),
       type: request.leaveType.name,
       isHalfDay: request.isHalfDay,
-      department: request.employee.department,
-      employee: {
-        name: request.employee.fullName,
-        email: request.employee.email,
+      department: request.user.department,
+      user: {
+        name: request.user.fullName,
+        email: request.user.email,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          request.employee.fullName
+          request.user.fullName
         )}`,
       },
       status: request.status.toLowerCase() as
@@ -80,7 +94,7 @@ export const TeamCalendarView = () => {
     data: leaveRequests,
     isLoading,
     error,
-  } = useLeaveRequestsByStatus("Approved");
+  } = useLeaveRequestsByStatus("APPROVED");
 
   // Convert API data to calendar events
   const filteredEvents = leaveRequests
@@ -265,15 +279,15 @@ export const TeamCalendarView = () => {
               <div className="flex items-start gap-4">
                 <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                   <img
-                    src={selectedEvent.employee.avatar}
-                    alt={selectedEvent.employee.name}
+                    src={selectedEvent.user.avatar}
+                    alt={selectedEvent.user.name}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <div>
-                  <h3 className="font-medium">{selectedEvent.employee.name}</h3>
+                  <h3 className="font-medium">{selectedEvent.user.name}</h3>
                   <p className="text-sm text-gray-500">
-                    {selectedEvent.employee.email}
+                    {selectedEvent.user.email}
                   </p>
                 </div>
               </div>

@@ -10,11 +10,12 @@ import { CalendarCheck } from "lucide-react";
 import { useLeaveRequestsByStatus } from "@/hooks/useLeaveRequests";
 
 const Manager = () => {
-  const { data: pendingRequests } = useLeaveRequestsByStatus("Pending");
-  const { data: recentApprovals } = useLeaveRequestsByStatus("Approved");
+  const { data: pendingRequests } = useLeaveRequestsByStatus("PENDING");
+  const { data: recentApprovals } = useLeaveRequestsByStatus("APPROVED");
   const [activeRequest, setActiveRequest] = useState<LeaveRequest>(
     pendingRequests?.[0] || null
   );
+  console.log({ pendingRequests, recentApprovals });
 
   return (
     <div className="min-h-screen bg-gray-50">

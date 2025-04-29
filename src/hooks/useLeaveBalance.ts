@@ -6,7 +6,7 @@ import { toast } from "./use-toast";
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 const fetchLeaveBalanceByEmail = async (email: string) => {
-  const { data } = await axios.get(`${VITE_API_URL}/leave-balance/employee`, {
+  const { data } = await axios.get(`${VITE_API_URL}/leave-balance/user`, {
     params: { email },
     withCredentials: true,
   });
@@ -93,5 +93,11 @@ export const useLeaveBalances = () => {
   return useQuery({
     queryKey: ["leaveBalance"],
     queryFn: fetchLeaveBalances,
+  });
+};
+export const useLeaveBalancesByEmail = (email: string) => {
+  return useQuery({
+    queryKey: ["leaveBalance", email],
+    queryFn: () => fetchLeaveBalanceByEmail(email),
   });
 };

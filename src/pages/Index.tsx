@@ -1,7 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { CalendarCheck, FileText, Users, BarChart3 } from "lucide-react";
 
 const Index = () => {
@@ -31,7 +37,8 @@ const Index = () => {
             Simplify Leave Management
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            An intuitive system for requesting, approving, and tracking employee leave with Microsoft integration.
+            An intuitive system for requesting, approving, and tracking user
+            leave with Microsoft integration.
           </p>
           <Button size="lg" className="bg-blue-600 hover:bg-blue-700" asChild>
             <Link to="/login">Get Started</Link>
@@ -41,7 +48,9 @@ const Index = () => {
 
       {/* Features section */}
       <section className="py-16 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">Key Features</h2>
+        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+          Key Features
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <Card>
             <CardHeader>
@@ -53,7 +62,8 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">
-                Request time off with just a few clicks. Select leave type, duration, and attach supporting documents.
+                Request time off with just a few clicks. Select leave type,
+                duration, and attach supporting documents.
               </p>
             </CardContent>
           </Card>
@@ -68,7 +78,8 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">
-                Managers can easily review, approve or reject leave requests with comments and notifications.
+                Managers can easily review, approve or reject leave requests
+                with comments and notifications.
               </p>
             </CardContent>
           </Card>
@@ -83,7 +94,8 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">
-                See who's away and when with a comprehensive team calendar, integrated with your Microsoft Outlook.
+                See who's away and when with a comprehensive team calendar,
+                integrated with your Microsoft Outlook.
               </p>
             </CardContent>
           </Card>
@@ -98,7 +110,8 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">
-                Stay updated on your available leave balance with visual charts and monthly accrual tracking.
+                Stay updated on your available leave balance with visual charts
+                and monthly accrual tracking.
               </p>
             </CardContent>
           </Card>

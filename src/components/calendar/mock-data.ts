@@ -83,7 +83,7 @@ export const PUBLIC_HOLIDAYS: PublicHoliday[] = [
   },
 ];
 
-// Sample employee data
+// Sample user data
 const employees = [
   {
     name: "John Smith",
@@ -126,7 +126,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     startDate: subDays(today, 2),
     endDate: addDays(today, 3),
     type: "annual",
-    employee: employees[0],
+    user: employees[0],
     department: "engineering",
     status: "approved",
     color: LEAVE_TYPES[1].color,
@@ -138,7 +138,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     endDate: addDays(today, 5),
     type: "sick",
     isHalfDay: true,
-    employee: employees[1],
+    user: employees[1],
     department: "design",
     status: "approved",
     color: LEAVE_TYPES[2].color,
@@ -149,7 +149,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     startDate: addDays(today, 10),
     endDate: addDays(today, 12),
     type: "personal",
-    employee: employees[2],
+    user: employees[2],
     department: "marketing",
     status: "pending",
     color: LEAVE_TYPES[3].color,
@@ -160,7 +160,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     startDate: addDays(today, 15),
     endDate: addDays(today, 45),
     type: "parental",
-    employee: employees[3],
+    user: employees[3],
     department: "hr",
     status: "approved",
     color: LEAVE_TYPES[4].color,
@@ -171,7 +171,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     startDate: addDays(today, 7),
     endDate: addDays(today, 11),
     type: "bereavement",
-    employee: employees[4],
+    user: employees[4],
     department: "finance",
     status: "approved",
     color: LEAVE_TYPES[5].color,
@@ -183,7 +183,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     startDate: addDays(today, 20),
     endDate: addDays(today, 25),
     type: "annual",
-    employee: employees[0],
+    user: employees[0],
     department: "engineering",
     status: "pending",
     color: LEAVE_TYPES[1].color,
@@ -195,7 +195,7 @@ export const LEAVE_EVENTS: CalendarEvent[] = [
     endDate: subDays(today, 5),
     type: "sick",
     isHalfDay: true,
-    employee: employees[2],
+    user: employees[2],
     department: "marketing",
     status: "approved",
     color: LEAVE_TYPES[2].color,

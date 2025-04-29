@@ -8,6 +8,7 @@ interface RecentApprovalsProps {
 }
 
 export const RecentApprovals = ({ approvals }: RecentApprovalsProps) => {
+  console.log({ approvals });
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -30,15 +31,15 @@ export const RecentApprovals = ({ approvals }: RecentApprovalsProps) => {
                 <div className="flex items-center">
                   <Avatar className="h-10 w-10 mr-3">
                     <AvatarImage
-                      src={approval?.employee.avatar}
-                      alt={approval?.employee.fullName}
+                      src={approval?.user.avatar.url}
+                      alt={approval?.user.fullName}
                     />
                     <AvatarFallback>
-                      {approval?.employee.fullName.charAt(0)}
+                      {approval?.user.fullName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{approval?.employee.fullName}</p>
+                    <p className="font-medium">{approval?.user.fullName}</p>
                     <p className="text-sm text-gray-500">
                       {approval?.leaveType.name}
                     </p>
@@ -52,9 +53,9 @@ export const RecentApprovals = ({ approvals }: RecentApprovalsProps) => {
                     Approved
                   </Badge>
                   <p className="text-sm text-gray-500 mt-1">
-                    {formatDate(approval.startDate)}
+                    {formatDate(approval.startDate.toString())}
                     {approval.startDate !== approval.endDate &&
-                      ` - ${formatDate(approval.endDate)}`}
+                      ` - ${formatDate(approval.endDate.toString())}`}
                   </p>
                 </div>
               </div>

@@ -25,7 +25,7 @@ export const sendEmail = async (instance, account, leaveDetails) => {
         toRecipients: [
           {
             emailAddress: {
-              address: leaveDetails.employeeEmail,
+              address: leaveDetails.userEmail,
             },
           },
         ],

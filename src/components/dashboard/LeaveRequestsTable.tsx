@@ -64,8 +64,8 @@ export const LeaveRequestsTable = () => {
               {request.startDate !== request.endDate &&
                 ` - ${formatDate(request.endDate)}`}
             </TableCell>
-            <TableCell>{request.employee.fullName}</TableCell>
-            <TableCell>{request.daysNumber}</TableCell>
+            <TableCell>{request.user.fullName}</TableCell>
+            <TableCell>{request?.daysNumber}</TableCell>
             <TableCell>
               <Badge
                 className={getStatusColor(request.status)}

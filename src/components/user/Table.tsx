@@ -1,4 +1,3 @@
-import { User } from "@/components/user/types";
 import {
   Table,
   TableBody,
@@ -20,6 +19,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import UserAvatar from "../ui/UserAvatar";
+import { User } from "./types";
 
 interface UserTableProps {
   users: User[];
@@ -62,6 +63,7 @@ const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
           <TableRow>
             <TableHead>No.</TableHead>
             <TableHead>Full Name</TableHead>
+            <TableHead>Avatar</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Department</TableHead>
@@ -83,6 +85,12 @@ const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell className="font-medium">{user.fullName}</TableCell>
+                <TableCell>
+                  <UserAvatar
+                    avatarUrl={user.avatar?.url}
+                    name={user.fullName}
+                  />
+                </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>{user.department}</TableCell>
@@ -118,7 +126,7 @@ const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => onDelete(user.id)}
+                            onClick={() => onDelete(user.id.toString())}
                             className="bg-destructive hover:bg-destructive/90"
                           >
                             Delete

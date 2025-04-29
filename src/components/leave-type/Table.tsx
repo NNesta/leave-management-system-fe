@@ -79,7 +79,7 @@ const LeaveTypeTable = ({
             <TableHead>Default Days</TableHead>
             <TableHead>Default Accrual Rate</TableHead>
             <TableHead>Max Carry Forward</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="self-end">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -100,8 +100,8 @@ const LeaveTypeTable = ({
                 <TableCell>{leaveType.defaultDays}</TableCell>
                 <TableCell>{leaveType.defaultAccrualRate}</TableCell>
                 <TableCell>{leaveType.maxCarryForward}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                <TableCell>
+                  <div className="flex  gap-2">
                     <Button
                       variant="outline"
                       size="icon"

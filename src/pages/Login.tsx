@@ -9,29 +9,57 @@ import {
 } from "@/components/ui/card";
 import { CalendarCheck } from "lucide-react";
 import { useMsal } from "@azure/msal-react";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { TfiMicrosoftAlt } from "react-icons/tfi";
+import { InteractionRequiredAuthError } from "@azure/msal-browser";
 
 const Login = () => {
   const { instance, accounts } = useMsal();
-
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
   const from = "/dashboard";
 
+  const getAccessToken = useCallback(async () => {
+    try {
+      const response = await instance.acquireTokenSilent({
+        scopes: ["User.Read"], // Needed for profile and photo
+        account: accounts[0],
+      });
+      console.log(response.accessToken); // <-- THIS is the correct token to send
+      return response.accessToken;
+    } catch (error) {
+      if (error instanceof InteractionRequiredAuthError) {
+        const response = await instance.acquireTokenPopup({
+          scopes: ["User.Read"],
+          account: accounts[0],
+        });
+        setToken(response.accessToken);
+        return response.accessToken;
+      } else {
+        throw error;
+      }
+    }
+  }, [instance, accounts, setToken]);
+
   useEffect(() => {
     if (accounts.length > 0) {
-      fetch("http://localhost:8080/api/v1/employees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: accounts[0].username,
-          fullName: accounts[0].name,
-        }),
-      }).then(() => navigate(from, { replace: true }));
+      getAccessToken().then((token) => {
+        fetch("http://localhost:8080/api/v1/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: accounts[0].username,
+            fullName: accounts[0].name,
+            microsoftId: accounts[0].localAccountId,
+            role: accounts[0].idTokenClaims.roles[0]?.toUpperCase(),
+            token,
+          }),
+        }).then(() => navigate(from, { replace: true }));
+      });
     }
-  }, [accounts, from, navigate]);
+  }, [accounts, from, navigate, getAccessToken]);
 
   const handleLogin = () => {
     instance.loginRedirect();

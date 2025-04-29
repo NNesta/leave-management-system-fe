@@ -22,10 +22,10 @@ const UsersPage = () => {
   const { mutate: createUser } = useCreateUser();
   const { mutate: updateUser } = useUpdateUser();
   const { mutate: deleteUser } = useDeleteUser();
-
-  // Handler for adding a new employee
-  const handleAddEmployee = (employee: Omit<User, "id">) => {
-    createUser(employee);
+  console.log({ users });
+  // Handler for adding a new user
+  const handleAddEmployee = (user: Omit<User, "id">) => {
+    createUser(user);
     setIsDialogOpen(false);
     toast({
       title: "Success",
@@ -33,9 +33,9 @@ const UsersPage = () => {
     });
   };
 
-  // Handler for updating an existing employee
-  const handleUpdateEmployee = (employee: User) => {
-    updateUser({ id: currentEmployee!.id, ...employee });
+  // Handler for updating an existing user
+  const handleUpdateEmployee = (user: User) => {
+    updateUser({ id: currentEmployee!.id, ...user });
     setIsDialogOpen(false);
     setCurrentEmployee(null);
     toast({
@@ -44,7 +44,7 @@ const UsersPage = () => {
     });
   };
 
-  // Handler for deleting an employee
+  // Handler for deleting an user
   const handleDeleteEmployee = (id: string) => {
     deleteUser(id);
     toast({
@@ -53,13 +53,13 @@ const UsersPage = () => {
     });
   };
 
-  // Handler for editing an employee
-  const handleEditEmployee = (employee: User) => {
-    setCurrentEmployee(employee);
+  // Handler for editing an user
+  const handleEditEmployee = (user: User) => {
+    setCurrentEmployee(user);
     setIsDialogOpen(true);
   };
 
-  // Handler for opening the dialog to add a new employee
+  // Handler for opening the dialog to add a new user
   const handleOpenAddDialog = () => {
     setCurrentEmployee(null);
     setIsDialogOpen(true);
@@ -72,7 +72,7 @@ const UsersPage = () => {
           <div>
             <h1 className="text-2xl font-bold">Employee Management</h1>
             <p className="text-muted-foreground mt-1">
-              Manage your organization's employee records
+              Manage your organization's user records
             </p>
           </div>
           <Button
@@ -80,7 +80,7 @@ const UsersPage = () => {
             className="flex items-center gap-2"
           >
             <PlusIcon className="h-4 w-4" />
-            Add Employee
+            Add User
           </Button>
         </div>
       </div>

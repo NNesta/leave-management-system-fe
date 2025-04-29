@@ -15,22 +15,30 @@ export async function createCalendarEvent(
   const accessToken = response.accessToken;
 
   console.log({ response, accessToken, leaveDetails });
+  const startDate = new Date(
+    leaveDetails.startDate[0],
+    leaveDetails.startDate[1] - 1,
+    leaveDetails.startDate[2]
+  );
+  const endDate = new Date(
+    leaveDetails.endDate[0],
+    leaveDetails.endDate[1] - 1,
+    leaveDetails.endDate[2]
+  );
 
   const event = {
-    subject: `${leaveDetails.employee.fullName} going in ${leaveDetails.leaveType.name}`,
+    subject: `${leaveDetails.user.fullName} going in ${leaveDetails.leaveType.name}`,
     body: {
       contentType: "HTML",
-      content: `Leave from ${
-        leaveDetails.startDate || new Date().toLocaleDateString()
-      } to ${
-        leaveDetails.endDate || new Date().toLocaleDateString()
-      }<br/>Reason: ${leaveDetails.leaveReason}`,
+      content: `Leave from ${startDate} to ${endDate}<br/>Reason: ${leaveDetails.reason}`,
     },
     start: {
-      dateTime: leaveDetails.startDate,
+      dateTime: startDate,
+      timeZone: "E. Africa Standard Time",
     },
     end: {
-      dateTime: leaveDetails.endDate,
+      dateTime: endDate,
+      timeZone: "E. Africa Standard Time",
     },
   };
 

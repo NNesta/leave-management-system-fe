@@ -6,7 +6,7 @@ export interface CalendarEvent {
   type: string;
   isHalfDay?: boolean;
   department?: string;
-  employee: {
+  user: {
     name: string;
     email: string;
     avatar: string;

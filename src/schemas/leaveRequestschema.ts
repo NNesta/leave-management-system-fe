@@ -1,34 +1,54 @@
-import * as z from "zod";
+import { z } from "zod";
 
-export const leaveRequestSchema = z
+// Helper function to check if a date is after today
+const isAfterToday = (date: Date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date >= today;
+};
+
+export const leaveFormSchema = z
   .object({
-    leaveType: z.string({
-      required_error: "Leave type is required",
-    }),
-    startDate: z.date({
-      required_error: "Start date is required",
-    }),
-    endDate: z.date().optional(),
-    isHalfDay: z.boolean().default(false),
-    leaveReason: z
+    leaveTypeId: z
       .string({
-        required_error: "Reason is required",
+        required_error: "Leave type is required",
       })
-      .min(1, "Reason is required"),
-    supportingDocuments: z.array(z.string()).optional(),
+      .nullable(),
+    isHalfDay: z.boolean().default(false),
+    startDate: z
+      .date({
+        required_error: "Start date is required",
+      })
+      .refine(isAfterToday, {
+        message: "Start date must be today or after",
+      }),
+    endDate: z
+      .date({
+        required_error: "End date is required",
+      })
+      .refine(isAfterToday, {
+        message: "End date must be today or after",
+      })
+      .nullable(),
+    leaveReason: z.string().optional(),
+    supportingDocuments: z.array(z.instanceof(File)).default([]).optional(),
   })
   .refine(
     (data) => {
-      // If it's not a half day, end date is required
-      if (!data.isHalfDay && !data.endDate) {
-        return false;
+      // If it's a half day request, we don't need to compare start and end dates
+      if (data.isHalfDay) return true;
+
+      // If end date is provided, ensure it's after or equal to start date
+      if (data.endDate && data.startDate) {
+        return data.endDate >= data.startDate;
       }
+
       return true;
     },
     {
-      message: "End date is required for full day leave requests",
+      message: "End date must be after or equal to start date",
       path: ["endDate"],
     }
   );
 
-export type LeaveRequestFormValues = z.infer<typeof leaveRequestSchema>;
+export type LeaveFormValues = z.infer<typeof leaveFormSchema>;

@@ -1,19 +1,14 @@
-interface Employee {
-  fullName: string;
-  avatar: string;
-  position: string;
-  email?: string;
-  department?: string;
-}
+import { User } from "../user/types";
 
 export interface LeaveRequest {
   id: string;
-  employee: Employee;
+  user: User;
   type: string;
-  startDate: string;
-  endDate: string;
+  startDate: number[];
+  endDate: number[];
   leaveDays: number;
-  leaveReason: string;
+  reason: string;
+  daysNumber: number;
   status: string;
   leaveType: {
     name: string;

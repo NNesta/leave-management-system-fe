@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { User } from "@/components/user/types";
+import { useUsersByRole } from "@/hooks/useEmployee";
 
 const departments = [
   "Frontend",
@@ -60,6 +61,7 @@ interface UserDialogProps {
 }
 
 const UserDialog = ({ isOpen, onClose, onSubmit, user }: UserDialogProps) => {
+  const { data: managers } = useUsersByRole("Manager");
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -101,8 +103,8 @@ const UserDialog = ({ isOpen, onClose, onSubmit, user }: UserDialogProps) => {
           </DialogTitle>
           <DialogDescription>
             {user
-              ? "Update the employee information below."
-              : "Fill out the form below to add a new employee."}
+              ? "Update the user information below."
+              : "Fill out the form below to add a new user."}
           </DialogDescription>
         </DialogHeader>
 

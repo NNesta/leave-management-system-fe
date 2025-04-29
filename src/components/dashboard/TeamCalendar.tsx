@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,26 +61,28 @@ const getDatesInRange = (startDate: string, endDate: string) => {
 
 // Flatten the leave data to get all dates
 const getAllLeaveDates = () => {
-  const allDates: { date: string; employee: string; type: string }[] = [];
-  
+  const allDates: { date: string; user: string; type: string }[] = [];
+
   teamLeaves.forEach((leave) => {
     if (leave.status === "Approved") {
       const dates = getDatesInRange(leave.startDate, leave.endDate);
       dates.forEach((date) => {
         allDates.push({
           date,
-          employee: leave.name,
+          user: leave.name,
           type: leave.type,
         });
       });
     }
   });
-  
+
   return allDates;
 };
 
 export const TeamCalendar = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
   const allLeaveDates = getAllLeaveDates();
 
   // Group leaves by date for the selected date
@@ -112,10 +113,10 @@ export const TeamCalendar = () => {
                   getLeavesByDate(selectedDate).map((leave, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                        {leave.employee.charAt(0)}
+                        {leave.user.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-medium">{leave.employee}</p>
+                        <p className="font-medium">{leave.user}</p>
                         <Badge
                           variant="outline"
                           className="mt-1 bg-blue-50 text-blue-700"

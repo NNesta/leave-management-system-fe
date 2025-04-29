@@ -19,6 +19,7 @@ const LeaveTypesPage = () => {
   const [currentLeaveType, setCurrentLeaveType] = useState<LeaveType | null>(
     null
   );
+  console.log({ leaveTypes });
   const { mutate: createLeaveType } = useCreateLeaveType();
   const { mutate: updateLeaveType } = useUpdateLeaveType();
   const { mutate: deleteLeaveType } = useDeleteLeaveType();
