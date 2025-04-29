@@ -18,6 +18,7 @@ import { useMsal } from "@azure/msal-react";
 import { createCalendarEvent } from "@/lib/createCalendarEvent";
 import { sendEmail } from "@/lib/sendEmail";
 import { useState } from "react";
+import UserAvatar from "../ui/UserAvatar";
 
 interface RequestDetailsProps {
   request: LeaveRequest;
@@ -56,85 +57,86 @@ export const RequestDetails = ({ request }: RequestDetailsProps) => {
         <CardTitle>Request Details</CardTitle>
         <CardDescription>Review and respond to leave request</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div>
-          <div className="flex items-center mb-6">
-            <Avatar className="h-12 w-12 mr-4">
-              <AvatarImage
-                src={request?.user.avatar.url}
-                alt={request?.user.fullName}
+      {request && (
+        <CardContent>
+          <div>
+            <div className="flex items-center mb-6">
+              {request?.user && (
+                <UserAvatar
+                  avatarUrl={request?.user?.avatar?.url}
+                  name={request?.user?.fullName}
+                />
+              )}
+              <div>
+                <h3 className="text-xl font-medium">
+                  {request?.user.fullName}
+                </h3>
+                <p className="text-gray-500">{request?.user.role}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Leave Type</p>
+                <p className="font-medium">{request?.type}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Duration</p>
+                <p className="font-medium">{request?.daysNumber} days</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">From</p>
+                <p className="font-medium">
+                  {formatDate(request?.startDate.toString())}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-1">To</p>
+                <p className="font-medium">
+                  {formatDate(request?.endDate.toString())}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 mb-1">Reason</p>
+              <p className="p-3 bg-gray-50 rounded-md">{request?.reason}</p>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 mb-1">Supporting Documents</p>
+              <SupportingDocument
+                documents={request?.supportingDocuments || []}
               />
-              <AvatarFallback>
-                {request?.user.fullName.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="text-xl font-medium">{request?.user.fullName}</h3>
-              <p className="text-gray-500">{request?.user.role}</p>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 mb-2">Your Comments</p>
+              <Textarea
+                placeholder="Add comments about this leave request..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <Button
+                onClick={handleApprove}
+                className="bg-green-600 hover:bg-green-700 flex-1"
+              >
+                {isApprovePending ? "Approving..." : "Approve Request"}
+              </Button>
+              <Button
+                onClick={handleReject}
+                variant="outline"
+                className="border-red-500 text-red-500 hover:bg-red-50 flex-1"
+              >
+                {isRejectPending ? "Rejecting..." : "Reject Request"}
+              </Button>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Leave Type</p>
-              <p className="font-medium">{request?.type}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Duration</p>
-              <p className="font-medium">{request?.daysNumber} days</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">From</p>
-              <p className="font-medium">
-                {formatDate(request?.startDate.toString())}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">To</p>
-              <p className="font-medium">
-                {formatDate(request?.endDate.toString())}
-              </p>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-sm text-gray-500 mb-1">Reason</p>
-            <p className="p-3 bg-gray-50 rounded-md">{request?.reason}</p>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-sm text-gray-500 mb-1">Supporting Documents</p>
-            <SupportingDocument
-              documents={request?.supportingDocuments || []}
-            />
-          </div>
-
-          <div className="mb-6">
-            <p className="text-sm text-gray-500 mb-2">Your Comments</p>
-            <Textarea
-              placeholder="Add comments about this leave request..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-4">
-            <Button
-              onClick={handleApprove}
-              className="bg-green-600 hover:bg-green-700 flex-1"
-            >
-              {isApprovePending ? "Approving..." : "Approve Request"}
-            </Button>
-            <Button
-              onClick={handleReject}
-              variant="outline"
-              className="border-red-500 text-red-500 hover:bg-red-50 flex-1"
-            >
-              {isRejectPending ? "Rejecting..." : "Reject Request"}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 };

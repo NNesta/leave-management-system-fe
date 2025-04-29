@@ -26,14 +26,14 @@ const updateDepartment = async (department: Department) => {
   const updatedDate = { ...department };
   delete updatedDate.id;
   const { data } = await axios.put(
-    `${VITE_API_URL}/employees/${department.id}`,
+    `${VITE_API_URL}/departments/${department.id}`,
     updatedDate
   );
   return data;
 };
 
 const deleteDepartment = async (id: string) => {
-  const { data } = await axios.delete(`${VITE_API_URL}/employees/${id}`);
+  const { data } = await axios.delete(`${VITE_API_URL}/departments/${id}`);
   return data;
 };
 

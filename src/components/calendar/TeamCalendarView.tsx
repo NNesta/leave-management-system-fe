@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -25,58 +25,44 @@ import { CalendarHeader } from "./CalendarHeader";
 import { CalendarMonthView } from "./CalendarMonthView";
 import { PUBLIC_HOLIDAYS } from "./mock-data";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/hooks/use-toast";
 import { LeaveRequest } from "../manager/types";
 import { useLeaveRequestsByStatus } from "@/hooks/useLeaveRequests";
-import { CalendarDay, CalendarEvent, CalendarViewMode } from "./types";
+import { CalendarEvent, CalendarViewMode } from "./types";
 import { Link } from "react-router-dom";
 
-const arrayToDate = (dateArray: number[] | null): Date | null => {
-  if (!dateArray) return null;
-  return new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
-};
-
 // Helper function to convert API leave requests to calendar events
-const convertToCalendarEvents = (
-  leaveRequests: LeaveRequest[]
-): CalendarEvent[] => {
-  return leaveRequests
-    .filter((request) => request.startDate && request.endDate) // Filter out requests with null dates
-    .map((request) => ({
-      id: request.id.toString(),
-      title: request.leaveType.name,
-      startDate: subDays(
-        new Date(
-          request.startDate[0],
-          request.startDate[1] - 1,
-          request.startDate[2]
-        ),
-        1
+const convertToCalendarEvents = (leaveRequests: LeaveRequest[]) => {
+  if (!leaveRequests) {
+    return null;
+  }
+  return leaveRequests.map((request) => ({
+    id: request.id.toString(),
+    title: request.leaveType.name,
+    startDate: subDays(
+      new Date(
+        request.startDate[0],
+        request.startDate[1] - 1,
+        request.startDate[2]
       ),
-      endDate: addDays(
-        new Date(
-          request.endDate[0],
-          request.endDate[1] - 1,
-          request.endDate[2]
-        ),
-        3
-      ),
-      type: request.leaveType.name,
-      isHalfDay: request.isHalfDay,
-      department: request.user.department,
-      user: {
-        name: request.user.fullName,
-        email: request.user.email,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          request.user.fullName
-        )}`,
-      },
-      status: request.status.toLowerCase() as
-        | "pending"
-        | "approved"
-        | "rejected",
-      color: "#3b82f6", // You can map colors based on leave type if needed
-    }));
+      1
+    ),
+    endDate: addDays(
+      new Date(request.endDate[0], request.endDate[1] - 1, request.endDate[2]),
+      3
+    ),
+    type: request.leaveType,
+    isHalfDay: request.isHalfDay,
+    department: request.user.department,
+    user: {
+      name: request.user.fullName,
+      email: request.user.email,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        request.user.fullName
+      )}`,
+    },
+    status: request.status.toLowerCase() as "pending" | "approved" | "rejected",
+    color: "#3b82f6", // You can map colors based on leave type if needed
+  }));
 };
 
 export const TeamCalendarView = () => {
@@ -85,9 +71,9 @@ export const TeamCalendarView = () => {
     null
   );
   const [viewMode, setViewMode] = useState<CalendarViewMode>("month");
-  const [days, setDays] = useState<CalendarDay[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
-  const [selectedLeaveType, setSelectedLeaveType] = useState("all");
+  const [days, setDays] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState("0");
+  const [selectedLeaveType, setSelectedLeaveType] = useState("0");
 
   // Fetch leave requests using React Query
   const {
@@ -95,18 +81,22 @@ export const TeamCalendarView = () => {
     isLoading,
     error,
   } = useLeaveRequestsByStatus("APPROVED");
+  console.log({ selectedLeaveType });
+  console.log(convertToCalendarEvents(leaveRequests), "+++++");
 
   // Convert API data to calendar events
-  const filteredEvents = leaveRequests
-    ? convertToCalendarEvents(leaveRequests).filter((event) => {
-        const departmentMatch =
-          selectedDepartment === "all" ||
-          event.department === selectedDepartment;
-        const typeMatch =
-          selectedLeaveType === "all" || event.type === selectedLeaveType;
-        return departmentMatch && typeMatch;
-      })
-    : [];
+  const filteredEvents = useMemo(() => {
+    if (!leaveRequests) return [];
+    return convertToCalendarEvents(leaveRequests).filter((event) => {
+      const departmentMatch =
+        selectedDepartment === "0" ||
+        event.department?.id.toString() == selectedDepartment;
+      const typeMatch =
+        selectedLeaveType == "0" ||
+        event.type.id.toString() == selectedLeaveType;
+      return departmentMatch && typeMatch;
+    });
+  }, [leaveRequests, selectedDepartment, selectedLeaveType]);
 
   // Generate calendar days
   useEffect(() => {
@@ -123,7 +113,7 @@ export const TeamCalendarView = () => {
           end: endDate,
         });
 
-        const calendarDays: CalendarDay[] = daysInMonth.map((date) => {
+        const calendarDays = daysInMonth.map((date) => {
           // Find events for this day
           const dayEvents = filteredEvents.filter((event) =>
             isWithinInterval(date, {
@@ -180,14 +170,6 @@ export const TeamCalendarView = () => {
 
   const handleToday = () => {
     setCurrentDate(new Date());
-  };
-
-  const handleAddEvent = () => {
-    toast({
-      title: "Add Leave Request",
-      description: "Redirecting to create a new leave request...",
-    });
-    // In a real app, you would navigate to the new leave request page
   };
 
   // Status badge styling
@@ -255,11 +237,7 @@ export const TeamCalendarView = () => {
       </div>
 
       {viewMode === "month" && (
-        <CalendarMonthView
-          days={days}
-          currentMonth={currentDate}
-          onEventClick={handleEventClick}
-        />
+        <CalendarMonthView days={days} onEventClick={handleEventClick} />
       )}
 
       {/* For the future: Week and Day views would go here */}
@@ -299,7 +277,9 @@ export const TeamCalendarView = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
-                  <div>{getStatusBadge(selectedEvent.status)}</div>
+                  <div>
+                    {getStatusBadge(selectedEvent.status.toLowerCase())}
+                  </div>
                 </div>
               </div>
 

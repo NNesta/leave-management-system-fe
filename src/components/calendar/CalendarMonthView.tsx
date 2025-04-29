@@ -4,15 +4,14 @@ import { CalendarDay, CalendarEvent, PublicHoliday } from "./types";
 
 interface CalendarMonthViewProps {
   days: CalendarDay[];
-  currentMonth: Date;
   onEventClick: (event: CalendarEvent) => void;
 }
 
 export const CalendarMonthView = ({
   days,
-  currentMonth,
   onEventClick,
 }: CalendarMonthViewProps) => {
+  console.log({ days });
   // Helper function to check if event spans multiple days
   const isMultiDayEvent = (event: CalendarEvent) => {
     return !isSameDay(event.startDate, event.endDate);

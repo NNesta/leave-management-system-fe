@@ -28,29 +28,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { User } from "@/components/user/types";
-import { useUsersByRole } from "@/hooks/useEmployee";
+import { useAllDepartments } from "@/hooks/useDepartment";
 
-const departments = [
-  "Frontend",
-  "Backend",
-  "Full Stack",
-  "Product",
-  "Design",
-  "Marketing",
-  "Sales",
-  "Human Resources",
-  "Finance",
-  "Legal",
-  "Operations",
-];
-
-const roles = ["Staff", "Manager", "Admin"];
+const roles = ["ADMIN", "MANAGER", "STAFF"];
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   role: z.string().min(1, "Please select a role"),
-  department: z.string().min(1, "Please select a department"),
+  departmentId: z.string().min(1, "Please select a department"),
 });
 
 interface UserDialogProps {
@@ -61,14 +47,15 @@ interface UserDialogProps {
 }
 
 const UserDialog = ({ isOpen, onClose, onSubmit, user }: UserDialogProps) => {
-  const { data: managers } = useUsersByRole("Manager");
+  const { data: departments } = useAllDepartments();
+  console.log({ departments });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       email: "",
       role: "",
-      department: "",
+      departmentId: "",
     },
   });
 
@@ -78,14 +65,14 @@ const UserDialog = ({ isOpen, onClose, onSubmit, user }: UserDialogProps) => {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        department: user.department,
+        departmentId: user.department?.id,
       });
     } else {
       form.reset({
         fullName: "",
         email: "",
         role: "",
-        department: "",
+        departmentId: "",
       });
     }
   }, [user, form, isOpen]);
@@ -168,7 +155,7 @@ const UserDialog = ({ isOpen, onClose, onSubmit, user }: UserDialogProps) => {
 
             <FormField
               control={form.control}
-              name="department"
+              name="departmentId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Department</FormLabel>
@@ -180,8 +167,11 @@ const UserDialog = ({ isOpen, onClose, onSubmit, user }: UserDialogProps) => {
                     </FormControl>
                     <SelectContent>
                       {departments.map((department) => (
-                        <SelectItem key={department} value={department}>
-                          {department}
+                        <SelectItem
+                          key={department.id.toString()}
+                          value={department.id.toString()}
+                        >
+                          {department.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

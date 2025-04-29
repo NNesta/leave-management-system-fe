@@ -34,14 +34,14 @@ const updateUser = async (user: User) => {
   const updatedDate = { ...user };
   delete updatedDate.id;
   const { data } = await axios.put(
-    `${VITE_API_URL}/employees/${user.id}`,
+    `${VITE_API_URL}/users/${user.id}`,
     updatedDate
   );
   return data;
 };
 
 const deleteUser = async (id: string) => {
-  const { data } = await axios.delete(`${VITE_API_URL}/employees/${id}`);
+  const { data } = await axios.delete(`${VITE_API_URL}/users/${id}`);
   return data;
 };
 

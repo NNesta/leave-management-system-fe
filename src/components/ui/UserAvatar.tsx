@@ -7,13 +7,19 @@ const UserAvatar = ({
   avatarUrl: string;
   name: string;
 }) => {
-  return avatarUrl ? (
+  const firstInitial = name?.charAt(0);
+  const secondInitial = name?.split(" ")[1]?.charAt(0);
+  console.log({ name });
+  return (
     <Avatar className="border border-white bg-black shadow-lg size-12">
       <AvatarImage src={avatarUrl} />
-      <AvatarFallback>{name}</AvatarFallback>
+      <AvatarFallback>
+        <p className="text-black text-xl">
+          {firstInitial}
+          {secondInitial}
+        </p>
+      </AvatarFallback>
     </Avatar>
-  ) : (
-    <p>Loading avatar...</p>
   );
 };
 

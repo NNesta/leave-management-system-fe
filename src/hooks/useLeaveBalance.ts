@@ -10,6 +10,8 @@ const fetchLeaveBalanceByEmail = async (email: string) => {
     params: { email },
     withCredentials: true,
   });
+  console.log({ email });
+  console.log({ data });
   return data || [];
 };
 

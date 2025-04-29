@@ -31,8 +31,8 @@ interface UserTableProps {
 const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
   const exportToCSV = () => {
     const headers = ["Name", "Email", "Role", "Department"];
-    const csvData = users.map((emp) =>
-      [emp.fullName, emp.email, emp.role, emp.department].join(",")
+    const csvData = users?.map((emp) =>
+      [emp.fullName, emp.email, emp.role, emp.department.name].join(",")
     );
 
     const csvContent = [headers.join(","), ...csvData].join("\n");
@@ -71,7 +71,7 @@ const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.length === 0 ? (
+          {users?.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={5}
@@ -81,7 +81,7 @@ const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
               </TableCell>
             </TableRow>
           ) : (
-            users.map((user, index) => (
+            users?.map((user, index) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell className="font-medium">{user.fullName}</TableCell>
@@ -93,7 +93,11 @@ const UsersTable = ({ users, onEdit, onDelete }: UserTableProps) => {
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
-                <TableCell>{user.department}</TableCell>
+                {user.department ? (
+                  <TableCell>{user.department.name}</TableCell>
+                ) : (
+                  <TableCell>No department</TableCell>
+                )}
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button

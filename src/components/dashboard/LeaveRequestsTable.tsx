@@ -53,37 +53,44 @@ export const LeaveRequestsTable = () => {
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
-        {leaveRequests.map((request) => (
-          <TableRow key={request.id}>
-            <TableCell className="font-medium">
-              {request.leaveType.name}
-            </TableCell>
-            <TableCell>
-              {formatDate(request.startDate)}
-              {request.startDate !== request.endDate &&
-                ` - ${formatDate(request.endDate)}`}
-            </TableCell>
-            <TableCell>{request.user.fullName}</TableCell>
-            <TableCell>{request?.daysNumber}</TableCell>
-            <TableCell>
-              <Badge
-                className={getStatusColor(request.status)}
-                variant="outline"
-              >
-                {request.status}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-right">
-              <Button variant="outline" size="sm">
-                <Link className="flex items-center" to={`/leave/${request.id}`}>
-                  <FileText className="h-4 w-4 mr-1" /> Details
-                </Link>
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      {leaveRequests?.length !== 0 ? (
+        <TableBody>
+          {leaveRequests.map((request) => (
+            <TableRow key={request.id}>
+              <TableCell className="font-medium">
+                {request.leaveType.name}
+              </TableCell>
+              <TableCell>
+                {formatDate(request.startDate)}
+                {request.startDate !== request.endDate &&
+                  ` - ${formatDate(request.endDate)}`}
+              </TableCell>
+              <TableCell>{request.user.fullName}</TableCell>
+              <TableCell>{request?.daysNumber}</TableCell>
+              <TableCell>
+                <Badge
+                  className={getStatusColor(request.status)}
+                  variant="outline"
+                >
+                  {request.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <Button variant="outline" size="sm">
+                  <Link
+                    className="flex items-center"
+                    to={`/leave/${request.id}`}
+                  >
+                    <FileText className="h-4 w-4 mr-1" /> Details
+                  </Link>
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      ) : (
+        <p>No leave requests found</p>
+      )}
     </Table>
   );
 };

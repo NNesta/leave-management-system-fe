@@ -49,6 +49,7 @@ const DepartmentsTable = ({
     link.click();
     document.body.removeChild(link);
   };
+  console.log({ departments });
   return (
     <div className="bg-white border rounded-lg shadow-sm">
       <div className="p-4 flex justify-end">

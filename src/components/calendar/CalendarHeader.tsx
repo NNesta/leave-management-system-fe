@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarViewMode } from "./types";
-import { DEPARTMENTS, LEAVE_TYPES } from "./mock-data";
+import { useAllDepartments } from "@/hooks/useDepartment";
+import { useAllLeaveTypes } from "@/hooks/useLeaveType";
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -44,6 +45,8 @@ export const CalendarHeader = ({
 }: CalendarHeaderProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const { data: allDepartments } = useAllDepartments();
+  const { data: allLeaveTypes } = useAllLeaveTypes();
   return (
     <div className="mb-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
@@ -90,33 +93,6 @@ export const CalendarHeader = ({
             <Filter className="h-4 w-4 mr-1" />
             Filters
           </Button>
-
-          <div className="flex rounded-md overflow-hidden">
-            <Button
-              variant={viewMode === "month" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onViewModeChange("month")}
-              className="rounded-r-none h-8"
-            >
-              Month
-            </Button>
-            <Button
-              variant={viewMode === "week" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onViewModeChange("week")}
-              className="rounded-none border-x-0 h-8"
-            >
-              Week
-            </Button>
-            <Button
-              variant={viewMode === "day" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onViewModeChange("day")}
-              className="rounded-l-none h-8"
-            >
-              Day
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -132,11 +108,16 @@ export const CalendarHeader = ({
                 <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>
-                {DEPARTMENTS.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
+                {[{ id: 0, name: "All Departments" }, ...allDepartments].map(
+                  (dept) => (
+                    <SelectItem
+                      key={dept.id.toString()}
+                      value={dept.id.toString()}
+                    >
+                      {dept.name}
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -147,17 +128,22 @@ export const CalendarHeader = ({
                 <SelectValue placeholder="Select leave type" />
               </SelectTrigger>
               <SelectContent>
-                {LEAVE_TYPES.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    <div className="flex items-center">
-                      <div
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: type.color }}
-                      ></div>
-                      {type.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                {[{ id: 0, name: "All Leave Types" }, ...allLeaveTypes].map(
+                  (type) => (
+                    <SelectItem
+                      key={type.id.toString()}
+                      value={type.id.toString()}
+                    >
+                      <div className="flex items-center">
+                        <div
+                          className="w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: type.color }}
+                        ></div>
+                        {type.name}
+                      </div>
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
           </div>

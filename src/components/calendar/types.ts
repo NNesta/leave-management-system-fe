@@ -1,3 +1,5 @@
+import { User } from "../user/types";
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -5,7 +7,7 @@ export interface CalendarEvent {
   endDate: Date;
   type: string;
   isHalfDay?: boolean;
-  department?: string;
+  department?: Department;
   user: {
     name: string;
     email: string;
@@ -25,6 +27,8 @@ export interface PublicHoliday {
 export interface Department {
   id: string;
   name: string;
+  manager: User;
+  description: string;
 }
 
 export interface LeaveType {

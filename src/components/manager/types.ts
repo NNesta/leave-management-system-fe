@@ -1,3 +1,4 @@
+import { LeaveType } from "../leave-type/type";
 import { User } from "../user/types";
 
 export interface LeaveRequest {
@@ -10,9 +11,7 @@ export interface LeaveRequest {
   reason: string;
   daysNumber: number;
   status: string;
-  leaveType: {
-    name: string;
-  };
+  leaveType: LeaveType;
   isHalfDay?: boolean;
   color?: string;
   supportingDocuments?: Document[];

@@ -34,6 +34,7 @@ const Dashboard = () => {
         )
     );
   }, [userLeaveBalances]);
+  console.log({ userLeaveBalances });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,28 +54,32 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {userLeaveBalances?.map((leave) => (
-            <Card key={leave.leaveType.name}>
-              <CardHeader className="pb-2">
-                <CardDescription>{leave.leaveType.name}</CardDescription>
-                <CardTitle className="text-2xl">
-                  {leave.takenDays} / {leave.totalDays} days
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-2 bg-gray-200 rounded-full mt-2">
-                  <div
-                    className="h-2 bg-blue-600 rounded-full"
-                    style={{
-                      width: `${(leave.takenDays / leave.totalDays) * 100}%`,
-                    }}
-                  ></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {userLeaveBalances?.length !== 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {userLeaveBalances?.map((leave) => (
+              <Card key={leave.leaveType.name}>
+                <CardHeader className="pb-2">
+                  <CardDescription>{leave.leaveType.name}</CardDescription>
+                  <CardTitle className="text-2xl">
+                    {leave.takenDays} / {leave.totalDays} days
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-2 bg-gray-200 rounded-full mt-2">
+                    <div
+                      className="h-2 bg-blue-600 rounded-full"
+                      style={{
+                        width: `${(leave.takenDays / leave.totalDays) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <p>No leave balances found</p>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <Card className="lg:col-span-2">

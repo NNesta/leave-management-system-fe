@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell } from "lucide-react";
 import { LeaveRequest } from "@/components/manager/types";
 import { countWorkingDays } from "@/lib/countWorkingDays";
+import UserAvatar from "../ui/UserAvatar";
 
 interface PendingRequestsProps {
   requests: LeaveRequest[];
@@ -43,7 +44,7 @@ export const PendingRequests = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {requests && (
+        {requests.length !== 0 ? (
           <div className="space-y-4">
             {requests.map((request) => (
               <div
@@ -56,15 +57,12 @@ export const PendingRequests = ({
                 onClick={() => onRequestSelect(request)}
               >
                 <div className="flex items-center mb-2">
-                  <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage
-                      src={request.user.avatar.url}
-                      alt={request.user.fullName}
+                  {request?.user && (
+                    <UserAvatar
+                      avatarUrl={request?.user?.avatar?.url}
+                      name={request?.user?.fullName}
                     />
-                    <AvatarFallback>
-                      {request.user.fullName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                  )}
                   <div>
                     <p className="font-medium">{request.user.fullName}</p>
                     <p className="text-sm text-gray-500">{request.user.role}</p>
@@ -88,6 +86,10 @@ export const PendingRequests = ({
                 </p>
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            <p className="text-gray-500">No pending requests</p>
           </div>
         )}
       </CardContent>

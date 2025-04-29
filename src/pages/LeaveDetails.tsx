@@ -11,10 +11,9 @@ const LeaveDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data: leaveRequest, isLoading, error } = useLeaveRequestById(id!);
-
+  console.log({ leaveRequest });
   // Function to format date array to Date object
   const formatDateArray = (dateArray: number[] | null) => {
-    if (!dateArray) return "Not specified";
     return new Date(
       dateArray[0],
       dateArray[1] - 1,
@@ -91,7 +90,8 @@ const LeaveDetails = () => {
                       {leaveRequest.user.fullName}
                     </CardTitle>
                     <p className="text-sm text-gray-500">
-                      {leaveRequest.user.role} • {leaveRequest.user.department}
+                      {leaveRequest.user.role} •{" "}
+                      {leaveRequest.user.department.name}
                     </p>
                   </div>
                 </div>
